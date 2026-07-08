@@ -32,6 +32,8 @@ export interface Competition {
   createdBy?: string; // userId, only set for custom (non-official) competitions
 }
 
+export type Division = "women" | "men";
+
 export interface Team {
   id: string;
   competitionId: string;
@@ -40,6 +42,7 @@ export interface Team {
   flagEmoji: string;
   logoUrl?: string;
   group?: string;
+  division?: Division;
 }
 
 export interface Match {
@@ -52,6 +55,7 @@ export interface Match {
   location: string;
   group?: string;
   round: string; // e.g. "Groepsfase - Ronde 1", "Kwartfinale", "Finale"
+  division?: Division;
   status: MatchStatus;
   homeScore?: number;
   awayScore?: number;
@@ -107,6 +111,7 @@ export interface Pool {
   isNational?: boolean; // the one official pool every paid user auto-joins
   isCompany?: boolean;
   companyId?: string;
+  division?: Division; // which tournament (e.g. women/men) this pool predicts, when the competition has divisions
   createdAt: string;
 }
 

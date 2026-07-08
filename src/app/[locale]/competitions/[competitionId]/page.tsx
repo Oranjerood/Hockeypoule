@@ -12,7 +12,8 @@ import Input, { Label } from "@/components/ui/Input";
 import PaymentButton from "@/components/PaymentButton";
 import PoolCard from "@/components/PoolCard";
 import { useAppStore } from "@/lib/store";
-import { getPoolsForUser, getMembersForPool, hasCompetitionAccess, computePoolLeaderboard } from "@/lib/pool-helpers";
+import { getPoolsForUser, getMembersForPool, hasCompetitionAccess, computePoolLeaderboard, computeOverallStandings } from "@/lib/pool-helpers";
+import LeaderboardTable from "@/components/pool/LeaderboardTable";
 import { Link } from "@/i18n/navigation";
 import { formatCurrency } from "@/lib/utils";
 
@@ -232,6 +233,27 @@ function CompetitionHubContent() {
     ({ pool }) => pool.competitionId === competitionId
   );
 
+  const womensNationalPool = pools.find(
+    (p) => p.competitionId === competitionId && p.isNational && p.division === "women"
+  );
+  const mensNationalPool = pools.find(
+    (p) => p.competitionId === competitionId && p.isNational && p.division === "men"
+  );
+  const overallStandings =
+    womensNationalPool && mensNationalPool
+      ? computeOverallStandings(
+          womensNationalPool,
+          mensNationalPool,
+          poolMembers,
+          users,
+          predictions,
+          specialPredictions,
+          getPointsSettings(womensNationalPool.id),
+          getPointsSettings(mensNationalPool.id),
+          matches
+        )
+      : [];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <div className="flex items-center gap-3">
@@ -245,6 +267,20 @@ function CompetitionHubContent() {
           </p>
         </div>
       </div>
+
+      {overallStandings.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+            Totaalklassement — vrouwen + mannen samen
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Wie in de officiële poule van beide toernooien meedoet, telt hier gecombineerd mee.
+          </p>
+          <div className="mt-4">
+            <LeaderboardTable rows={overallStandings} currentUserId={currentUser.id} />
+          </div>
+        </div>
+      )}
 
       <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-muted">
         {t("yourPools")}

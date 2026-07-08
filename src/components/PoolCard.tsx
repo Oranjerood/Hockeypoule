@@ -32,9 +32,14 @@ export default function PoolCard({
           )}
         </div>
         <h3 className="mt-3 font-semibold leading-tight">{pool.name}</h3>
-        {pool.isNational && (
-          <span className="mt-0.5 text-xs font-medium text-primary">🇳🇱 Landelijke poule</span>
-        )}
+        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          {pool.isNational && (
+            <span className="text-xs font-medium text-primary">Officiële poule</span>
+          )}
+          {pool.division && (
+            <Badge tone="neutral">{pool.division === "women" ? "Vrouwen" : "Mannen"}</Badge>
+          )}
+        </div>
         <div className="mt-auto flex items-center justify-between pt-4 text-sm text-muted">
           <span className="flex items-center gap-1">
             <Users size={14} /> {memberCount} {t("members")}

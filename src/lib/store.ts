@@ -40,6 +40,7 @@ interface CreatePoolInput {
   name: string;
   competitionId: string;
   visibility: "public" | "private";
+  division?: "women" | "men";
   logoUrl?: string;
 }
 
@@ -381,6 +382,7 @@ export const useAppStore = create<AppState>()(
           inviteCode: generateInviteCode(),
           competitionId: input.competitionId,
           ownerId,
+          division: input.division,
           logoUrl: input.logoUrl,
           createdAt: new Date().toISOString(),
         };

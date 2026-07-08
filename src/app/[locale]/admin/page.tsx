@@ -21,7 +21,7 @@ type Tab = "competitions" | "sports" | "teams" | "matches" | "points" | "users" 
 function AdminContent() {
   const t = useTranslations("Admin");
   const [tab, setTab] = useState<Tab>("matches");
-  const [poolIdForPoints, setPoolIdForPoints] = useState<string>("pool-national");
+  const [poolIdForPoints, setPoolIdForPoints] = useState<string>("pool-national-women");
 
   const pools = useAppStore((s) => s.pools);
   const poolMembers = useAppStore((s) => s.poolMembers);

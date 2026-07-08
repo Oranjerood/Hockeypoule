@@ -22,6 +22,7 @@ function CreatePoolContent() {
   const currentUser = useAppStore((s) => s.currentUser());
   const competitions = useAppStore((s) => s.competitions);
   const competitionAccess = useAppStore((s) => s.competitionAccess);
+  const teams = useAppStore((s) => s.teams);
   const createPool = useAppStore((s) => s.createPool);
 
   const competition = competitions.find((comp) => comp.id === competitionId);
@@ -34,6 +35,11 @@ function CreatePoolContent() {
   const [name, setName] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | undefined>();
   const [visibility, setVisibility] = useState<"public" | "private">("private");
+  const [division, setDivision] = useState<"women" | "men" | "">("");
+
+  const hasDivisions = teams.some(
+    (team) => team.competitionId === competitionId && team.division
+  );
 
   function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -44,7 +50,13 @@ function CreatePoolContent() {
   }
 
   function handleCreate() {
-    const pool = createPool({ name, competitionId, visibility, logoUrl: logoPreview });
+    const pool = createPool({
+      name,
+      competitionId,
+      visibility,
+      division: division || undefined,
+      logoUrl: logoPreview,
+    });
     router.push(`/pools/${pool.id}`);
   }
 
@@ -119,7 +131,38 @@ function CreatePoolContent() {
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
               </label>
             </div>
-            <Button fullWidth size="lg" disabled={!name} onClick={() => setStep(2)}>
+            {hasDivisions && (
+              <div>
+                <Label>Voor wie voorspel je?</Label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={() => setDivision("women")}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      division === "women" ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <span className="font-semibold">Vrouwen</span>
+                  </button>
+                  <button
+                    onClick={() => setDivision("men")}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      division === "men" ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <span className="font-semibold">Mannen</span>
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-muted">
+                  Deze poule voorspelt alleen dit toernooi — maak een tweede poule als je ook de andere wilt spelen.
+                </p>
+              </div>
+            )}
+            <Button
+              fullWidth
+              size="lg"
+              disabled={!name || (hasDivisions && !division)}
+              onClick={() => setStep(2)}
+            >
               {tc("next")}
             </Button>
           </div>
