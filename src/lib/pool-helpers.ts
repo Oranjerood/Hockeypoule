@@ -10,8 +10,9 @@ import type {
   CompetitionAccess,
   Division,
   LeaderboardRow,
+  CountryFollow,
 } from "@/types";
-import { buildLeaderboard } from "@/lib/scoring";
+import { buildLeaderboard, DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
 
 export function getMembersForPool(poolMembers: PoolMember[], poolId: string) {
   return poolMembers.filter((m) => m.poolId === poolId);
@@ -157,4 +158,34 @@ export function computeOverallStandings(
   rows.forEach((row, index) => { row.position = index + 1; });
 
   return rows;
+}
+
+// "King/queen of a country" - rank everyone who has chosen to follow a
+// specific team (country) for a competition by how many points they've
+// scored on just that team's matches. A lightweight, optional prediction
+// game alongside the main tournament leaderboard.
+export function computeCountryLeaderboard(
+  teamId: string,
+  competitionId: string,
+  allMatches: Match[],
+  predictions: Prediction[],
+  users: User[],
+  countryFollows: CountryFollow[]
+): LeaderboardRow[] {
+  const followerIds = countryFollows
+    .filter((f) => f.teamId === teamId && f.competitionId === competitionId)
+    .map((f) => f.userId);
+  const followerUsers = users.filter((u) => followerIds.includes(u.id));
+  const teamMatches = allMatches.filter(
+    (m) => m.competitionId === competitionId && (m.homeTeamId === teamId || m.awayTeamId === teamId)
+  );
+
+  return buildLeaderboard(
+    followerUsers,
+    teamMatches,
+    predictions,
+    [],
+    { championTeamId: undefined, finalistTeamIds: undefined, topscorerName: undefined },
+    DEFAULT_POINTS_SETTINGS
+  );
 }

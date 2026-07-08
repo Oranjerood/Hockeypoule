@@ -200,6 +200,16 @@ export interface Badge {
   icon: string; // lucide icon name, resolved in the UI
 }
 
+// A user can "follow" one specific country per competition to compete to
+// become king/queen of that country's predictions - a lightweight, optional
+// extra alongside predicting the whole tournament.
+export interface CountryFollow {
+  userId: string;
+  competitionId: string;
+  teamId: string;
+  createdAt: string;
+}
+
 export interface ChatMessage {
   id: string;
   poolId: string;

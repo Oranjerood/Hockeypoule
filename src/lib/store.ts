@@ -19,6 +19,7 @@ import type {
   Sport,
   Division,
   ChatMessage,
+  CountryFollow,
 } from "@/types";
 import {
   USERS,
@@ -85,6 +86,7 @@ interface AppState {
   sponsors: Sponsor[];
   prizes: Prize[];
   chatMessages: ChatMessage[];
+  countryFollows: CountryFollow[];
 
   currentUser: () => User | null;
 
@@ -133,6 +135,10 @@ interface AppState {
   addSponsor: (name: string) => void;
   addPrize: (title: string, description: string) => void;
   sendChatMessage: (poolId: string, text: string) => void;
+
+  // "king/queen of a country" - follow one team per competition
+  followCountry: (competitionId: string, teamId: string) => void;
+  unfollowCountry: (competitionId: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -155,6 +161,7 @@ export const useAppStore = create<AppState>()(
       sponsors: SPONSORS,
       prizes: PRIZES,
       chatMessages: [],
+      countryFollows: [],
 
       currentUser: () => {
         const { currentUserId, users } = get();
@@ -623,6 +630,32 @@ export const useAppStore = create<AppState>()(
               createdAt: new Date().toISOString(),
             },
           ],
+        });
+      },
+
+      followCountry: (competitionId, teamId) => {
+        const { countryFollows, currentUserId } = get();
+        if (!currentUserId) return;
+        // Only one active country pick per competition - picking a new one
+        // replaces the previous pick.
+        const withoutMine = countryFollows.filter(
+          (f) => !(f.userId === currentUserId && f.competitionId === competitionId)
+        );
+        set({
+          countryFollows: [
+            ...withoutMine,
+            { userId: currentUserId, competitionId, teamId, createdAt: new Date().toISOString() },
+          ],
+        });
+      },
+
+      unfollowCountry: (competitionId) => {
+        const { countryFollows, currentUserId } = get();
+        if (!currentUserId) return;
+        set({
+          countryFollows: countryFollows.filter(
+            (f) => !(f.userId === currentUserId && f.competitionId === competitionId)
+          ),
         });
       },
     }),

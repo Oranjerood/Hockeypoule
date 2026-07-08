@@ -19,6 +19,7 @@ export default function Header() {
   const navLinks = currentUser
     ? [
         { href: "/dashboard", label: t("dashboard") },
+        { href: "/predictions", label: t("predictions") },
         { href: "/profile", label: t("profile") },
         ...(currentUser.isAdmin ? [{ href: "/admin", label: t("admin") }] : []),
       ]

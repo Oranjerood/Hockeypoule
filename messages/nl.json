@@ -33,7 +33,8 @@
     "chatEmpty": "Nog geen berichten. Zeg als eerste iets!",
     "chatUnknown": "Onbekend",
     "chatPlaceholder": "Typ een bericht...",
-    "chatSend": "Versturen"
+    "chatSend": "Versturen",
+    "predictions": "Mijn voorspellingen"
   },
   "Home": {
     "heroTitle": "Wees de kenner van jouw team",
@@ -100,7 +101,10 @@
     "switchText": "Bekijk hoe je ervoor staat in een van je andere poules.",
     "switchPlaceholder": "Kies een poule...",
     "switchButton": "Bekijk",
-    "switchCombinedOption": "Totaalklassement — {name} (dames + heren)"
+    "switchCombinedOption": "Totaalklassement — {name} (dames + heren)",
+    "startTitle": "Begin met voorspellen",
+    "startText": "Koop eenmalig toegang — je landelijke poule staat dan meteen voor je klaar.",
+    "startButton": "Start & koop toegang"
   },
   "Competitions": {
     "hubSubtitle": "Officiële competitie",
@@ -250,12 +254,27 @@
     "squadComingSoon": "Binnenkort beschikbaar — hier komt de volledige selectie per team te staan zodra deze bekend is.",
     "statusFinished": "Afgelopen",
     "statusLive": "Bezig",
-    "statusUpcoming": "Nog te spelen"
+    "statusUpcoming": "Nog te spelen",
+    "kingQueenTitle": "Word koning/koningin van {team}",
+    "kingQueenText": "Voorspel dit land specifiek en strijd tegen andere fans van dit team om de titel.",
+    "kingQueenLoginCta": "Log in om mee te doen",
+    "kingQueenFollowButton": "Word koning/koningin van dit land",
+    "kingQueenFollowing": "Jij bent kandidaat",
+    "kingQueenUnfollow": "Stop met volgen",
+    "kingQueenSwitchNote": "Je volgt momenteel een ander land voor dit toernooi — kiezen voor dit land vervangt die keuze.",
+    "kingQueenLeaderboard": "Ranglijst koning/koningin",
+    "kingQueenEmpty": "Nog niemand heeft dit land gekozen. Wees de eerste!"
   },
   "Profile": {
     "achievements": "Badges",
     "history": "Historie",
     "noBadgesYet": "Nog geen badges verdiend — blijf voorspellen!",
     "noHistoryYet": "Nog geen voorspellingen gedaan."
+  },
+  "Predictions": {
+    "title": "Mijn voorspellingen",
+    "subtitle": "Vul hier al je voorspellingen in. Ze gelden automatisch voor alle poules waarin je meedoet — je hoeft een wedstrijd maar één keer te voorspellen.",
+    "noAccess": "Je hebt nog geen toegang tot een competitie om te voorspellen.",
+    "browseCompetitions": "Bekijk competities"
   }
 }

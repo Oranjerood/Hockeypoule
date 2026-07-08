@@ -2,13 +2,15 @@
 
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Users, MapPin, ArrowLeft } from "lucide-react";
+import { Users, MapPin, ArrowLeft, Crown } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/store";
 import { formatDateLong, teamName } from "@/lib/utils";
 import { computeGroupStandings } from "@/lib/standings";
+import { computeCountryLeaderboard } from "@/lib/pool-helpers";
+import Button from "@/components/ui/Button";
 import type { Team, Match } from "@/types";
 
 function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
@@ -104,6 +106,88 @@ function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; 
   );
 }
 
+function CountryFollowCard({ team, teamMatches }: { team: Team; teamMatches: Match[] }) {
+  const locale = useLocale();
+  const t = useTranslations("Team");
+  const currentUser = useAppStore((s) => s.currentUser());
+  const countryFollows = useAppStore((s) => s.countryFollows);
+  const users = useAppStore((s) => s.users);
+  const predictions = useAppStore((s) => s.predictions);
+  const followCountry = useAppStore((s) => s.followCountry);
+  const unfollowCountry = useAppStore((s) => s.unfollowCountry);
+
+  const leaderboard = computeCountryLeaderboard(
+    team.id,
+    team.competitionId,
+    teamMatches,
+    predictions,
+    users,
+    countryFollows
+  );
+  const myFollow = currentUser
+    ? countryFollows.find((f) => f.userId === currentUser.id && f.competitionId === team.competitionId)
+    : undefined;
+  const isFollowingThisTeam = myFollow?.teamId === team.id;
+  const name = teamName(team, locale);
+
+  return (
+    <Card className="mt-4 p-5">
+      <div className="flex items-center gap-2">
+        <Crown size={17} className="text-primary" />
+        <h4 className="font-semibold">{t("kingQueenTitle", { team: name })}</h4>
+      </div>
+      <p className="mt-1 text-sm text-muted">{t("kingQueenText")}</p>
+
+      <div className="mt-3">
+        {!currentUser ? (
+          <Button href="/login" variant="outline" size="sm">
+            {t("kingQueenLoginCta")}
+          </Button>
+        ) : isFollowingThisTeam ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="primary">{t("kingQueenFollowing")}</Badge>
+            <Button size="sm" variant="outline" onClick={() => unfollowCountry(team.competitionId)}>
+              {t("kingQueenUnfollow")}
+            </Button>
+          </div>
+        ) : (
+          <Button size="sm" onClick={() => followCountry(team.competitionId, team.id)}>
+            {t("kingQueenFollowButton")}
+          </Button>
+        )}
+        {currentUser && myFollow && !isFollowingThisTeam && (
+          <p className="mt-2 text-xs text-muted">{t("kingQueenSwitchNote")}</p>
+        )}
+      </div>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <h5 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          {t("kingQueenLeaderboard")}
+        </h5>
+        {leaderboard.length === 0 ? (
+          <p className="mt-2 text-sm text-muted">{t("kingQueenEmpty")}</p>
+        ) : (
+          <div className="mt-2 space-y-1.5">
+            {leaderboard.slice(0, 5).map((row) => (
+              <div
+                key={row.userId}
+                className={`flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ${
+                  row.userId === currentUser?.id ? "bg-primary/5" : ""
+                }`}
+              >
+                <span>
+                  {row.position}. {row.name}
+                </span>
+                <span className="font-semibold">{row.points} pt</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams: Team[]; matches: Match[] }) {
   const locale = useLocale();
   const t = useTranslations("Team");
@@ -129,6 +213,7 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
         </div>
         <GroupStandingsTable team={team} allTeams={allTeams} matches={matches} locale={locale} />
       </div>
+      <CountryFollowCard team={team} teamMatches={teamMatches} />
     </div>
   );
 }
