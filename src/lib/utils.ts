@@ -57,3 +57,19 @@ export function teamName(
 ): string {
   return locale === "en" && team.nameEn ? team.nameEn : team.name;
 }
+
+// Accepts either a bare invite code (e.g. "KANTOOR8") or a full invite link
+// (e.g. "https://hockeypoule.app/join/KANTOOR8") and returns just the code.
+export function extractInviteCode(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+  try {
+    if (trimmed.includes("/")) {
+      const parts = trimmed.split("/").filter(Boolean);
+      return parts[parts.length - 1];
+    }
+  } catch {
+    // fall through
+  }
+  return trimmed;
+}

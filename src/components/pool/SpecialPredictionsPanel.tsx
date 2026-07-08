@@ -104,7 +104,7 @@ export default function SpecialPredictionsPanel({
         </div>
 
         <div className="sm:col-span-2">
-          <Label>{t("topscorerPrediction")} (top 3, net als bij Scorito — één goed is genoeg)</Label>
+          <Label>{t("topscorerPrediction")}</Label>
           <div className="grid gap-2 sm:grid-cols-3">
             <input
               disabled={locked}

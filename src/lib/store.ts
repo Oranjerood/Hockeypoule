@@ -91,7 +91,7 @@ interface AppState {
   // auth
   login: (email: string, name?: string) => void;
   logout: () => void;
-  updateProfile: (name: string) => void;
+  updateProfile: (name: string, avatarPhotoUrl?: string) => void;
 
   // theme
   setTheme: (theme: "light" | "dark") => void;
@@ -181,11 +181,13 @@ export const useAppStore = create<AppState>()(
 
       logout: () => set({ currentUserId: null }),
 
-      updateProfile: (name) => {
+      updateProfile: (name, avatarPhotoUrl) => {
         const { users, currentUserId } = get();
         set({
           users: users.map((u) =>
-            u.id === currentUserId ? { ...u, name } : u
+            u.id === currentUserId
+              ? { ...u, name, ...(avatarPhotoUrl !== undefined ? { avatarPhotoUrl } : {}) }
+              : u
           ),
         });
       },

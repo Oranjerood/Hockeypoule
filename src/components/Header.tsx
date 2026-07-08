@@ -55,9 +55,17 @@ export default function Header() {
           <LanguageSwitcher />
           <ThemeToggle />
           {currentUser ? (
-            <div className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {currentUser.name.slice(0, 2).toUpperCase()}
-            </div>
+            <Link
+              href="/profile"
+              className="ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-bold text-primary-foreground"
+            >
+              {currentUser.avatarPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={currentUser.avatarPhotoUrl} alt={currentUser.name} className="h-9 w-9 object-cover" />
+              ) : (
+                currentUser.name.slice(0, 2).toUpperCase()
+              )}
+            </Link>
           ) : (
             <>
               <Button href="/login" variant="ghost" size="sm" className="text-white hover:text-white">

@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import Input, { Label } from "@/components/ui/Input";
 import { useAppStore } from "@/lib/store";
 import { hasCompetitionAccess } from "@/lib/pool-helpers";
+import { extractInviteCode } from "@/lib/utils";
 import { Globe } from "lucide-react";
 
 function JoinPoolContent() {
@@ -32,9 +33,10 @@ function JoinPoolContent() {
 
   function handleJoinCode(e: React.FormEvent) {
     e.preventDefault();
-    const pool = pools.find((p) => p.inviteCode.toLowerCase() === code.trim().toLowerCase());
+    const extractedCode = extractInviteCode(code);
+    const pool = pools.find((p) => p.inviteCode.toLowerCase() === extractedCode.toLowerCase());
     if (!pool) {
-      setError("Geen poule gevonden met deze code.");
+      setError("Geen poule gevonden met deze code of link.");
       return;
     }
     const competition = competitions.find((c) => c.id === pool.competitionId);
@@ -42,7 +44,7 @@ function JoinPoolContent() {
       router.push(`/competitions/${competition.id}`);
       return;
     }
-    joinPoolByCode(code);
+    joinPoolByCode(extractedCode);
     router.push(`/pools/${pool.id}`);
   }
 
@@ -68,9 +70,9 @@ function JoinPoolContent() {
             <Label htmlFor="code">{t("joinCode")}</Label>
             <Input
               id="code"
-              placeholder="BIJV. KANTOOR8"
+              placeholder="Bijv. KANTOOR8 of een geplakte uitnodigingslink"
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onChange={(e) => setCode(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-danger">{error}</p>}

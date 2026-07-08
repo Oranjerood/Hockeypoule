@@ -20,7 +20,6 @@ import {
   getMembersForPool,
   getMatchesForCompetition,
   computePoolLeaderboard,
-  computeOverallStandings,
   hasCompetitionAccess,
 } from "@/lib/pool-helpers";
 
@@ -111,23 +110,6 @@ function PoolDetailContent() {
     allMatches
   );
 
-  // When this is one of the two official national pools (women's/men's),
-  // also show the combined overall standings right here.
-  let overallStandings: ReturnType<typeof computeOverallStandings> = [];
-  if (pool.isNational && pool.division) {
-    const otherDivision = pool.division === "women" ? "men" : "women";
-    const otherPool = pools.find(
-      (p) => p.competitionId === pool.competitionId && p.isNational && p.division === otherDivision
-    );
-    if (otherPool) {
-      const otherSettings = getPointsSettings(otherPool.id);
-      overallStandings =
-        pool.division === "women"
-          ? computeOverallStandings(pool, otherPool, poolMembers, users, predictions, specialPredictions, settings, otherSettings, allMatches)
-          : computeOverallStandings(otherPool, pool, poolMembers, users, predictions, specialPredictions, otherSettings, settings, allMatches);
-    }
-  }
-
   const tabs: { id: Tab; label: string; icon: typeof Trophy }[] = [
     { id: "leaderboard", label: t("tabLeaderboard"), icon: Trophy },
     { id: "participants", label: t("tabParticipants"), icon: Users },
@@ -184,22 +166,7 @@ function PoolDetailContent() {
 
       <div className="mt-6">
         {tab === "leaderboard" && (
-          <div className="space-y-8">
-            <LeaderboardTable rows={leaderboard} currentUserId={currentUser.id} />
-            {overallStandings.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-                  {t("overallTitle")}
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  {t("overallText")}
-                </p>
-                <div className="mt-4">
-                  <LeaderboardTable rows={overallStandings} currentUserId={currentUser.id} />
-                </div>
-              </div>
-            )}
-          </div>
+          <LeaderboardTable rows={leaderboard} currentUserId={currentUser.id} />
         )}
         {tab === "participants" && (
           <ParticipantsTab pool={pool} members={members} users={users} />

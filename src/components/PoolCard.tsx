@@ -19,6 +19,7 @@ export default function PoolCard({
   position?: number;
 }) {
   const t = useTranslations("Dashboard");
+  const c = useTranslations("Common");
 
   return (
     <Link href={`/pools/${pool.id}`}>
@@ -34,10 +35,10 @@ export default function PoolCard({
         <h3 className="mt-3 font-semibold leading-tight">{pool.name}</h3>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
           {pool.isNational && (
-            <span className="text-xs font-medium text-primary">Officiële poule</span>
+            <span className="text-xs font-medium text-primary">{c("officialPool")}</span>
           )}
           {pool.division && (
-            <Badge tone="neutral">{pool.division === "women" ? "Vrouwen" : "Mannen"}</Badge>
+            <Badge tone="neutral">{pool.division === "women" ? c("women") : c("men")}</Badge>
           )}
         </div>
         <div className="mt-auto flex items-center justify-between pt-4 text-sm text-muted">

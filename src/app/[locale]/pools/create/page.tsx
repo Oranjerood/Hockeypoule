@@ -133,7 +133,7 @@ function CreatePoolContent() {
             </div>
             {hasDivisions && (
               <div>
-                <Label>Voor wie voorspel je?</Label>
+                <Label>{t("predictForWhom")}</Label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <button
                     onClick={() => setDivision("women")}
@@ -141,7 +141,7 @@ function CreatePoolContent() {
                       division === "women" ? "border-primary bg-primary/5" : "border-border"
                     }`}
                   >
-                    <span className="font-semibold">Vrouwen</span>
+                    <span className="font-semibold">{tc("women")}</span>
                   </button>
                   <button
                     onClick={() => setDivision("men")}
@@ -149,11 +149,11 @@ function CreatePoolContent() {
                       division === "men" ? "border-primary bg-primary/5" : "border-border"
                     }`}
                   >
-                    <span className="font-semibold">Mannen</span>
+                    <span className="font-semibold">{tc("men")}</span>
                   </button>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Deze poule voorspelt alleen dit toernooi — maak een tweede poule als je ook de andere wilt spelen.
+                  {t("predictForWhomNote")}
                 </p>
               </div>
             )}

@@ -94,6 +94,8 @@
     "nationalPools": "National pool(s)",
     "ownPools": "Your own pools",
     "noOwnPools": "You don't have your own pool yet. Create one, or join with a code.",
+    "overallCard": "Overall standings",
+    "overallCardSubtitle": "Women + Men combined",
     "switchTitle": "Quickly switch between pools",
     "switchText": "See how you're doing in one of your other pools.",
     "switchPlaceholder": "Choose a pool...",
@@ -113,7 +115,7 @@
     "noExtra": "No extra",
     "customAmount": "Custom amount",
     "payButton": "Pay and join",
-    "companyOption": "For a group",
+    "companyOption": "For friends, family, teammates or colleagues",
     "companyOptionText": "Pay once for your company, club, team, family or group of friends. They join afterwards for free using a code.",
     "companyGroupName": "Group name (company, club, team or family)",
     "companyGroupNamePlaceholder": "E.g. Office Team, HC Oranje-Rood D1, The Smith Family",
@@ -159,6 +161,8 @@
     "browsePublic": "Discover public pools",
     "needsAccessTitle": "Access required first",
     "needsAccessText": "You don't have access yet to this pool's competition.",
+    "predictForWhom": "Who are you predicting for?",
+    "predictForWhomNote": "This pool only predicts this tournament — create a second pool if you want to play the other one too.",
     "goToCompetition": "Go to the competition"
   },
   "PoolDetail": {

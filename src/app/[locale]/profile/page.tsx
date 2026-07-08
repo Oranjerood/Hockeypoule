@@ -11,7 +11,7 @@ import { initials, formatDateLong } from "@/lib/utils";
 import { useRouter } from "@/i18n/navigation";
 import { computeBadges } from "@/lib/achievements";
 import { scoreMatchPrediction, DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
-import { Trophy, Target, Flame, Sunrise, Crosshair, Award } from "lucide-react";
+import { Trophy, Target, Flame, Sunrise, Crosshair, Award, Camera } from "lucide-react";
 
 const BADGE_ICONS: Record<string, typeof Trophy> = {
   Trophy,
@@ -39,6 +39,7 @@ function ProfileContent() {
   const getPointsSettings = useAppStore((s) => s.getPointsSettings);
   const pf = useTranslations("Profile");
   const [name, setName] = useState(currentUser?.name ?? "");
+  const [photo, setPhoto] = useState<string | undefined>(currentUser?.avatarPhotoUrl);
   const [saved, setSaved] = useState(false);
 
   if (!currentUser) return null;
@@ -78,12 +79,31 @@ function ProfileContent() {
       <h1 className="text-2xl font-bold tracking-tight">{c("profile")}</h1>
       <Card className="mt-6 p-6">
         <div className="flex items-center gap-4">
-          <div
-            className="flex h-16 w-16 items-center justify-center rounded-full text-lg font-bold text-white"
+          <label className="group relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full text-lg font-bold text-white"
             style={{ backgroundColor: currentUser.avatarColor }}
           >
-            {initials(currentUser.name)}
-          </div>
+            {photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photo} alt={currentUser.name} className="h-16 w-16 rounded-full object-cover" />
+            ) : (
+              initials(currentUser.name)
+            )}
+            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+              <Camera size={18} className="text-white" />
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => setPhoto(reader.result as string);
+                reader.readAsDataURL(file);
+              }}
+            />
+          </label>
           <div>
             <p className="font-semibold">{currentUser.name}</p>
             <p className="text-sm text-muted">{currentUser.email}</p>
@@ -93,7 +113,7 @@ function ProfileContent() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            updateProfile(name);
+            updateProfile(name, photo);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
           }}

@@ -94,6 +94,8 @@
     "nationalPools": "Landelijke poule(s)",
     "ownPools": "Jouw eigen poules",
     "noOwnPools": "Je hebt nog geen eigen poule. Maak er een aan, of doe mee via een code.",
+    "overallCard": "Totaalklassement",
+    "overallCardSubtitle": "Vrouwen + Mannen samen",
     "switchTitle": "Snel wisselen tussen poules",
     "switchText": "Bekijk hoe je ervoor staat in een van je andere poules.",
     "switchPlaceholder": "Kies een poule...",
@@ -113,7 +115,7 @@
     "noExtra": "Geen extra",
     "customAmount": "Ander bedrag",
     "payButton": "Betalen en meedoen",
-    "companyOption": "Voor een groep",
+    "companyOption": "Voor vrienden, familie, teamgenoten of collega's",
     "companyOptionText": "Betaal in één keer voor je bedrijf, club, team, familie of vriendengroep. Zij doen daarna gratis mee met een code die jij deelt.",
     "companyGroupName": "Naam van de groep (bedrijf, club, team of familie)",
     "companyGroupNamePlaceholder": "Bijv. Team Kantoor, HC Oranje-Rood D1, Familie Jansen",
@@ -159,6 +161,8 @@
     "browsePublic": "Ontdek publieke poules",
     "needsAccessTitle": "Eerst toegang nodig",
     "needsAccessText": "Je hebt nog geen toegang tot de competitie van deze poule.",
+    "predictForWhom": "Voor wie voorspel je?",
+    "predictForWhomNote": "Deze poule voorspelt alleen dit toernooi — maak een tweede poule als je ook de andere wilt spelen.",
     "goToCompetition": "Ga naar de competitie"
   },
   "PoolDetail": {

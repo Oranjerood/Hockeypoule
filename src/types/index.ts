@@ -69,6 +69,7 @@ export interface User {
   name: string;
   email: string;
   avatarColor: string;
+  avatarPhotoUrl?: string; // data URL of an uploaded profile photo
   isAdmin?: boolean;
 }
 

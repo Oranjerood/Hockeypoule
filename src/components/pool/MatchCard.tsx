@@ -23,6 +23,7 @@ export default function MatchCard({
   onSave: (homeScore: number, awayScore: number) => void;
 }) {
   const t = useTranslations("PoolDetail");
+  const tc = useTranslations("Common");
   const locale = useLocale();
   const home = teams.find((team) => team.id === match.homeTeamId)!;
   const away = teams.find((team) => team.id === match.awayTeamId)!;
@@ -54,7 +55,7 @@ export default function MatchCard({
         <div className="flex items-center gap-1.5">
           {match.division && (
             <Badge tone={match.division === "women" ? "primary" : "neutral"}>
-              {match.division === "women" ? "Vrouwen" : "Mannen"}
+              {match.division === "women" ? tc("women") : tc("men")}
             </Badge>
           )}
           <Badge tone={statusTone}>{statusLabel}</Badge>

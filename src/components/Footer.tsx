@@ -26,7 +26,7 @@ export default function Footer() {
           </nav>
         </div>
         <p className="mt-8 text-xs text-muted">
-          © {new Date().getFullYear()} {c("appName")} — {t("footerTagline")}
+          © {new Date().getFullYear()} {c("appName")} — Powered by Oranje-Rood Dames 1
         </p>
       </div>
     </footer>

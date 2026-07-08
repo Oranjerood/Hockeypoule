@@ -6,14 +6,17 @@ import PoolCard from "@/components/PoolCard";
 import Button from "@/components/ui/Button";
 import { useAppStore } from "@/lib/store";
 import { getPoolsForUser, getMembersForPool, computePoolLeaderboard } from "@/lib/pool-helpers";
-import { PlusCircle, UsersRound } from "lucide-react";
+import { PlusCircle, UsersRound, Trophy } from "lucide-react";
 import PoolSwitcher from "@/components/PoolSwitcher";
+import Card from "@/components/ui/Card";
+import { Link } from "@/i18n/navigation";
 
 const WK_HOCKEY_ID = "comp-wk-hockey-2026";
 
 function DashboardContent() {
   const t = useTranslations("Dashboard");
   const currentUser = useAppStore((s) => s.currentUser());
+  const competitions = useAppStore((s) => s.competitions);
   const pools = useAppStore((s) => s.pools);
   const poolMembers = useAppStore((s) => s.poolMembers);
   const users = useAppStore((s) => s.users);
@@ -27,6 +30,15 @@ function DashboardContent() {
   const myPools = getPoolsForUser(pools, poolMembers, currentUser.id);
   const nationalPools = myPools.filter(({ pool }) => pool.isNational);
   const ownPools = myPools.filter(({ pool }) => !pool.isNational);
+
+  // Competitions where the user has both an official women's and men's pool
+  // get a "combined standings" card next to those two.
+  const combinedCompetitions = competitions.filter((competition) => {
+    const inThisCompetition = nationalPools.filter(({ pool }) => pool.competitionId === competition.id);
+    const hasWomen = inThisCompetition.some(({ pool }) => pool.division === "women");
+    const hasMen = inThisCompetition.some(({ pool }) => pool.division === "men");
+    return hasWomen && hasMen;
+  });
 
   function renderPoolCard({ pool, role }: { pool: (typeof myPools)[number]["pool"]; role: "owner" | "member" }) {
     const memberCount = getMembersForPool(poolMembers, pool.id).length;
@@ -76,6 +88,20 @@ function DashboardContent() {
               </h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {nationalPools.map(renderPoolCard)}
+                {combinedCompetitions.map((competition) => (
+                  <Link key={competition.id} href={`/competitions/${competition.id}`}>
+                    <Card className="flex h-full flex-col p-5 transition-shadow hover:shadow-md">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                        <Trophy size={22} />
+                      </div>
+                      <h3 className="mt-3 font-semibold leading-tight">{t("overallCard")}</h3>
+                      <p className="mt-0.5 text-xs font-medium text-primary">
+                        {t("overallCardSubtitle")}
+                      </p>
+                      <p className="mt-auto pt-4 text-sm text-muted">{competition.name}</p>
+                    </Card>
+                  </Link>
+                ))}
               </div>
             </div>
           )}
