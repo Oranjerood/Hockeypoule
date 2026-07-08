@@ -6,16 +6,16 @@ import { CalendarClock } from "lucide-react";
 import MatchCard from "./MatchCard";
 import SpecialPredictionsPanel from "./SpecialPredictionsPanel";
 import { useAppStore } from "@/lib/store";
-import type { Match, PointsSettings } from "@/types";
+import type { Match, PointsSettings, Division } from "@/types";
 
 export default function MatchesTab({
-  poolId,
   matches,
   settings,
+  division,
 }: {
-  poolId: string;
   matches: Match[];
   settings: PointsSettings;
+  division?: Division;
 }) {
   const t = useTranslations("PoolDetail");
   const currentUser = useAppStore((s) => s.currentUser());
@@ -44,11 +44,14 @@ export default function MatchesTab({
     (m) => !m.round.toLowerCase().includes("groepsfase") && m.status !== "upcoming"
   );
 
-  const mySpecial = specialPredictions.find(
-    (sp) => sp.poolId === poolId && sp.userId === currentUser?.id
-  );
-
   const competitionId = matches[0]?.competitionId;
+
+  const mySpecial = specialPredictions.find(
+    (sp) =>
+      sp.competitionId === competitionId &&
+      sp.division === division &&
+      sp.userId === currentUser?.id
+  );
   const competitionTeams = allTeams.filter((team) => team.competitionId === competitionId);
 
   return (
@@ -57,7 +60,7 @@ export default function MatchesTab({
         teams={competitionTeams}
         prediction={mySpecial}
         locked={specialLocked || !currentUser}
-        onSave={(data) => setSpecialPrediction(poolId, data)}
+        onSave={(data) => setSpecialPrediction(competitionId, division, data)}
       />
 
       <div className="flex flex-wrap gap-3">
@@ -102,7 +105,7 @@ export default function MatchesTab({
               prediction={prediction}
               settings={settings}
               onSave={(homeScore, awayScore) =>
-                setMatchPrediction(poolId, match.id, homeScore, awayScore)
+                setMatchPrediction(match.id, homeScore, awayScore)
               }
             />
           );

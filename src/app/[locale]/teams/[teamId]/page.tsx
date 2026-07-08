@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Users, MapPin, ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Card from "@/components/ui/Card";
@@ -13,6 +13,7 @@ import type { Team, Match } from "@/types";
 
 function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
   const locale = useLocale();
+  const t = useTranslations("Team");
   const isHome = match.homeTeamId === team.id;
   const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
   const opponent = allTeams.find((t) => t.id === opponentId);
@@ -20,7 +21,7 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
   const statusTone =
     match.status === "finished" ? "neutral" : match.status === "live" ? "danger" : "primary";
   const statusLabel =
-    match.status === "finished" ? "Afgelopen" : match.status === "live" ? "Bezig" : "Nog te spelen";
+    match.status === "finished" ? t("statusFinished") : match.status === "live" ? t("statusLive") : t("statusUpcoming");
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
@@ -47,6 +48,7 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
 }
 
 function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; allTeams: Team[]; matches: Match[]; locale: string }) {
+  const t = useTranslations("Team");
   if (!team.group) return null;
 
   const groupTeams = allTeams.filter(
@@ -59,18 +61,18 @@ function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; 
 
   return (
     <div>
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">Stand {team.group}</h4>
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">{t("standings", { group: team.group })}</h4>
       <div className="mt-2 overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[360px] text-sm">
           <thead>
             <tr className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
               <th className="px-3 py-2 font-medium">#</th>
-              <th className="px-3 py-2 font-medium">Team</th>
-              <th className="px-2 py-2 text-right font-medium">W</th>
-              <th className="px-2 py-2 text-right font-medium">G</th>
-              <th className="px-2 py-2 text-right font-medium">V</th>
-              <th className="px-2 py-2 text-right font-medium">DS</th>
-              <th className="px-2 py-2 text-right font-medium">Pt</th>
+              <th className="px-3 py-2 font-medium">{t("team")}</th>
+              <th className="px-2 py-2 text-right font-medium">{t("won")}</th>
+              <th className="px-2 py-2 text-right font-medium">{t("drawn")}</th>
+              <th className="px-2 py-2 text-right font-medium">{t("lost")}</th>
+              <th className="px-2 py-2 text-right font-medium">{t("goalDifference")}</th>
+              <th className="px-2 py-2 text-right font-medium">{t("points")}</th>
             </tr>
           </thead>
           <tbody>
@@ -104,6 +106,8 @@ function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; 
 
 function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams: Team[]; matches: Match[] }) {
   const locale = useLocale();
+  const t = useTranslations("Team");
+  const c = useTranslations("Common");
   const teamMatches = matches
     .filter((m) => m.homeTeamId === team.id || m.awayTeamId === team.id)
     .sort((a, b) => new Date(a.date + "T" + a.time).getTime() - new Date(b.date + "T" + b.time).getTime());
@@ -111,12 +115,12 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
   return (
     <div className="mt-6">
       <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
-        {team.division === "women" ? "Vrouwen" : team.division === "men" ? "Mannen" : "Wedstrijden"}
+        {team.division === "women" ? c("women") : team.division === "men" ? c("men") : t("matches")}
       </h3>
       <div className="mt-3 grid gap-4 lg:grid-cols-2">
         <div className="space-y-2">
           {teamMatches.length === 0 ? (
-            <p className="text-sm text-muted">Nog geen wedstrijden bekend.</p>
+            <p className="text-sm text-muted">{t("noMatchesYet")}</p>
           ) : (
             teamMatches.map((match) => (
               <TeamMatchRow key={match.id} match={match} team={team} allTeams={allTeams} />
@@ -132,6 +136,7 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
 function TeamPageContent() {
   const params = useParams<{ teamId: string }>();
   const locale = useLocale();
+  const t = useTranslations("Team");
   const teams = useAppStore((s) => s.teams);
   const matches = useAppStore((s) => s.matches);
 
@@ -140,9 +145,9 @@ function TeamPageContent() {
   if (!team) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <p className="text-muted">Team niet gevonden.</p>
+        <p className="text-muted">{t("notFound")}</p>
         <Link href="/" className="mt-4 inline-block text-primary hover:underline">
-          Terug naar de homepage
+          {t("backToHome")}
         </Link>
       </div>
     );
@@ -158,7 +163,7 @@ function TeamPageContent() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <Link href="/" className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground">
-        <ArrowLeft size={14} /> Terug
+        <ArrowLeft size={14} /> {t("back")}
       </Link>
 
       <div className="mt-4 flex items-center gap-4">
@@ -184,10 +189,10 @@ function TeamPageContent() {
       <Card className="mt-8 p-6">
         <div className="flex items-center gap-2">
           <Users size={18} className="text-primary" />
-          <h2 className="font-semibold">Spelerslijst</h2>
+          <h2 className="font-semibold">{t("squad")}</h2>
         </div>
         <p className="mt-2 text-sm text-muted">
-          Binnenkort beschikbaar — hier komt de volledige selectie per team te staan zodra deze bekend is.
+          {t("squadComingSoon")}
         </p>
       </Card>
     </div>

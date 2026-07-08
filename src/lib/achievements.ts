@@ -9,7 +9,7 @@ import type {
   SpecialPrediction,
   PointsSettings,
 } from "@/types";
-import { buildUserStats, scoreMatchPrediction } from "@/lib/scoring";
+import { buildUserStats, scoreMatchPrediction, DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
 import { getMatchesForCompetition, computePoolLeaderboard } from "@/lib/pool-helpers";
 
 export function computeBadges(
@@ -107,9 +107,7 @@ export function computeBadges(
   if (finishedPredictions.length >= 5) {
     const correct = finishedPredictions.filter((p) => {
       const match = ctx.matches.find((m) => m.id === p.matchId)!;
-      const pool = ctx.pools.find((pl) => pl.id === p.poolId);
-      const settings = pool ? ctx.getPointsSettings(pool.id) : undefined;
-      return settings ? scoreMatchPrediction(match, p, settings) > 0 : false;
+      return scoreMatchPrediction(match, p, DEFAULT_POINTS_SETTINGS) > 0;
     }).length;
     if (correct / finishedPredictions.length >= 0.6) {
       badges.push({

@@ -307,10 +307,8 @@ export const PREDICTIONS: Prediction[] = [
   ...USERS.flatMap((user, userIndex) =>
     wkMatches.map((match, matchIndex) => {
       const seed = userIndex * 7 + matchIndex;
-      const poolId = match.division === "women" ? "pool-national-women" : "pool-national-men";
       return {
         id: `pred-${user.id}-${match.id}`,
-        poolId,
         userId: user.id,
         matchId: match.id,
         homeScore: guessScore(seed),
@@ -326,7 +324,6 @@ export const PREDICTIONS: Prediction[] = [
       const awayScore = userIndex === 0 ? match.awayScore! : guessScore(seed + 2);
       return {
         id: `pred-${user.id}-${match.id}`,
-        poolId: "pool-custom-football",
         userId: user.id,
         matchId: match.id,
         homeScore,
@@ -338,10 +335,10 @@ export const PREDICTIONS: Prediction[] = [
 ];
 
 export const SPECIAL_PREDICTIONS: SpecialPrediction[] = [
-  { poolId: "pool-national-women", userId: "u-niels", competitionId: WK_HOCKEY.id, championTeamId: "team-w-netherlands", finalistTeamIds: ["team-w-netherlands", "team-w-australia"], topscorerNames: ["Yibbi Jansen", "Frederique Matla", "Xan de Waard"] },
-  { poolId: "pool-national-women", userId: "u-sanne", competitionId: WK_HOCKEY.id, championTeamId: "team-w-australia", finalistTeamIds: ["team-w-netherlands", "team-w-australia"], topscorerNames: ["Maddie Hinch", "Yibbi Jansen", "Grace Balsdon"] },
-  { poolId: "pool-national-men", userId: "u-niels", competitionId: WK_HOCKEY.id, championTeamId: "team-m-netherlands", finalistTeamIds: ["team-m-netherlands", "team-m-belgium"], topscorerNames: ["Jip Janssen", "Thijs van Dam", "Duco Telgenkamp"] },
-  { poolId: "pool-national-men", userId: "u-fleur", competitionId: WK_HOCKEY.id, championTeamId: "team-m-belgium", finalistTeamIds: ["team-m-netherlands", "team-m-belgium"], topscorerNames: ["Arthur van Doren", "Jip Janssen", "Tom Boon"] },
+  { division: "women", userId: "u-niels", competitionId: WK_HOCKEY.id, championTeamId: "team-w-netherlands", finalistTeamIds: ["team-w-netherlands", "team-w-australia"], topscorerNames: ["Yibbi Jansen", "Frederique Matla", "Xan de Waard"] },
+  { division: "women", userId: "u-sanne", competitionId: WK_HOCKEY.id, championTeamId: "team-w-australia", finalistTeamIds: ["team-w-netherlands", "team-w-australia"], topscorerNames: ["Maddie Hinch", "Yibbi Jansen", "Grace Balsdon"] },
+  { division: "men", userId: "u-niels", competitionId: WK_HOCKEY.id, championTeamId: "team-m-netherlands", finalistTeamIds: ["team-m-netherlands", "team-m-belgium"], topscorerNames: ["Jip Janssen", "Thijs van Dam", "Duco Telgenkamp"] },
+  { division: "men", userId: "u-fleur", competitionId: WK_HOCKEY.id, championTeamId: "team-m-belgium", finalistTeamIds: ["team-m-netherlands", "team-m-belgium"], topscorerNames: ["Arthur van Doren", "Jip Janssen", "Tom Boon"] },
 ];
 
 export const SPONSORS: Sponsor[] = [

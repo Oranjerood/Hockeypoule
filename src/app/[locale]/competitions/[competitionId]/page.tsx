@@ -48,6 +48,7 @@ function CompetitionHubContent() {
   const [companyLogo, setCompanyLogo] = useState<string | undefined>();
   const [companySeats, setCompanySeats] = useState(10);
   const [companyResult, setCompanyResult] = useState<{ inviteCode: string } | null>(null);
+  const [inviteContacts, setInviteContacts] = useState("");
   const [redeemCode, setRedeemCode] = useState("");
   const [redeemError, setRedeemError] = useState("");
 
@@ -116,7 +117,7 @@ function CompetitionHubContent() {
               }`}
             >
               <span className="flex items-center gap-1.5 font-semibold">
-                <Gift size={15} className="text-primary" /> Voor een groep (cadeau)
+                <Gift size={15} className="text-primary" /> {t("companyOption")}
               </span>
               <p className="mt-1 text-sm text-muted">{t("companyOptionText")}</p>
             </button>
@@ -273,10 +274,46 @@ function CompetitionHubContent() {
           )}
 
           {companyResult && (
-            <div className="mt-4 rounded-xl bg-success/10 p-4 text-sm">
-              <p className="font-medium text-success">{t("companyResultTitle")}</p>
-              <p className="mt-1 text-muted">{t("companyResultText")}</p>
-              <p className="mt-2 font-mono text-base font-bold">{companyResult.inviteCode}</p>
+            <div className="mt-4 space-y-4 rounded-xl bg-success/10 p-4 text-sm">
+              <div>
+                <p className="font-medium text-success">{t("companyResultTitle")}</p>
+                <p className="mt-1 text-muted">{t("companyResultText")}</p>
+                <p className="mt-2 font-mono text-base font-bold">{companyResult.inviteCode}</p>
+              </div>
+
+              <div className="border-t border-success/20 pt-4">
+                <Label>E-mailadressen of telefoonnummers (één per regel)</Label>
+                <textarea
+                  value={inviteContacts}
+                  onChange={(e) => setInviteContacts(e.target.value)}
+                  placeholder={"naam1@bedrijf.nl\nnaam2@bedrijf.nl\n06-12345678"}
+                  rows={4}
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
+                />
+                <p className="mt-1 text-xs text-muted">
+                  E-mailadressen kan je direct uitnodigen. Telefoonnummers zet je zelf in je
+                  WhatsApp/SMS-bericht — plak de code erbij.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const emails = inviteContacts
+                        .split(/\r?\n/)
+                        .map((line) => line.trim())
+                        .filter((line) => line.includes("@"));
+                      const subject = encodeURIComponent("Doe mee aan de WK Hockey poule!");
+                      const body = encodeURIComponent(
+                        `Je bent uitgenodigd voor onze WK Hockey poule. Gebruik deze code om gratis mee te doen: ${companyResult.inviteCode}`
+                      );
+                      window.location.href = `mailto:?bcc=${emails.join(",")}&subject=${subject}&body=${body}`;
+                    }}
+                  >
+                    Open e-mail met uitnodiging
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </Card>

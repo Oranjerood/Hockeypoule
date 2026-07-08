@@ -17,6 +17,8 @@ import type {
   Sponsor,
   Prize,
   Sport,
+  Division,
+  ChatMessage,
 } from "@/types";
 import {
   USERS,
@@ -82,6 +84,7 @@ interface AppState {
   companies: Company[];
   sponsors: Sponsor[];
   prizes: Prize[];
+  chatMessages: ChatMessage[];
 
   currentUser: () => User | null;
 
@@ -111,14 +114,14 @@ interface AppState {
 
   // predictions
   setMatchPrediction: (
-    poolId: string,
     matchId: string,
     homeScore: number,
     awayScore: number
   ) => void;
   setSpecialPrediction: (
-    poolId: string,
-    data: Partial<Omit<SpecialPrediction, "poolId" | "userId" | "competitionId">>
+    competitionId: string,
+    division: Division | undefined,
+    data: Partial<Omit<SpecialPrediction, "userId" | "competitionId" | "division">>
   ) => void;
 
   // admin
@@ -129,6 +132,7 @@ interface AppState {
   toggleUserAdmin: (userId: string) => void;
   addSponsor: (name: string) => void;
   addPrize: (title: string, description: string) => void;
+  sendChatMessage: (poolId: string, text: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -150,6 +154,7 @@ export const useAppStore = create<AppState>()(
       companies: COMPANIES,
       sponsors: SPONSORS,
       prizes: PRIZES,
+      chatMessages: [],
 
       currentUser: () => {
         const { currentUserId, users } = get();
@@ -504,14 +509,13 @@ export const useAppStore = create<AppState>()(
         return pool;
       },
 
-      setMatchPrediction: (poolId, matchId, homeScore, awayScore) => {
+      setMatchPrediction: (matchId, homeScore, awayScore) => {
         const { predictions, currentUserId } = get();
         if (!currentUserId) return;
         const id = `pred-${currentUserId}-${matchId}`;
         const existingIndex = predictions.findIndex((p) => p.id === id);
         const updated: Prediction = {
           id,
-          poolId,
           userId: currentUserId,
           matchId,
           homeScore,
@@ -527,12 +531,14 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      setSpecialPrediction: (poolId, data) => {
-        const { specialPredictions, currentUserId, pools } = get();
+      setSpecialPrediction: (competitionId, division, data) => {
+        const { specialPredictions, currentUserId } = get();
         if (!currentUserId) return;
-        const pool = pools.find((p) => p.id === poolId);
         const existingIndex = specialPredictions.findIndex(
-          (sp) => sp.poolId === poolId && sp.userId === currentUserId
+          (sp) =>
+            sp.competitionId === competitionId &&
+            sp.division === division &&
+            sp.userId === currentUserId
         );
         if (existingIndex >= 0) {
           const next = [...specialPredictions];
@@ -543,9 +549,9 @@ export const useAppStore = create<AppState>()(
             specialPredictions: [
               ...specialPredictions,
               {
-                poolId,
                 userId: currentUserId,
-                competitionId: pool?.competitionId ?? "",
+                competitionId,
+                division,
                 ...data,
               },
             ],
@@ -574,12 +580,13 @@ export const useAppStore = create<AppState>()(
       },
 
       deletePool: (poolId) => {
-        const { pools, poolMembers, predictions, specialPredictions } = get();
+        const { pools, poolMembers, chatMessages } = get();
+        // Predictions are shared across pools for the same competition, so
+        // deleting a pool only removes the pool, its memberships and chat.
         set({
           pools: pools.filter((p) => p.id !== poolId),
           poolMembers: poolMembers.filter((m) => m.poolId !== poolId),
-          predictions: predictions.filter((p) => p.poolId !== poolId),
-          specialPredictions: specialPredictions.filter((sp) => sp.poolId !== poolId),
+          chatMessages: chatMessages.filter((m) => m.poolId !== poolId),
         });
       },
 
@@ -598,6 +605,23 @@ export const useAppStore = create<AppState>()(
       addPrize: (title, description) => {
         const { prizes } = get();
         set({ prizes: [...prizes, { id: `prize-${Date.now()}`, title, description }] });
+      },
+
+      sendChatMessage: (poolId, text) => {
+        const { chatMessages, currentUserId } = get();
+        if (!currentUserId || !text.trim()) return;
+        set({
+          chatMessages: [
+            ...chatMessages,
+            {
+              id: `chat-${Date.now()}`,
+              poolId,
+              userId: currentUserId,
+              text: text.trim(),
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        });
       },
     }),
     {

@@ -72,7 +72,7 @@ function DashboardContent() {
           {nationalPools.length > 0 && (
             <div className="mt-8">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-                Landelijke poule(s)
+                {t("nationalPools")}
               </h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {nationalPools.map(renderPoolCard)}
@@ -82,11 +82,11 @@ function DashboardContent() {
 
           <div className="mt-8">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-              Jouw eigen poules
+              {t("ownPools")}
             </h2>
             {ownPools.length === 0 ? (
               <p className="mt-3 text-sm text-muted">
-                Je hebt nog geen eigen poule. Maak er een aan, of doe mee via een code.
+                {t("noOwnPools")}
               </p>
             ) : (
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

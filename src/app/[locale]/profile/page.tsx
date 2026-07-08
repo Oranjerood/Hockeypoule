@@ -10,7 +10,7 @@ import { useAppStore } from "@/lib/store";
 import { initials, formatDateLong } from "@/lib/utils";
 import { useRouter } from "@/i18n/navigation";
 import { computeBadges } from "@/lib/achievements";
-import { scoreMatchPrediction } from "@/lib/scoring";
+import { scoreMatchPrediction, DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
 import { Trophy, Target, Flame, Sunrise, Crosshair, Award } from "lucide-react";
 
 const BADGE_ICONS: Record<string, typeof Trophy> = {
@@ -58,11 +58,16 @@ function ProfileContent() {
     .filter((p) => p.userId === currentUser.id)
     .map((p) => {
       const match = matches.find((m) => m.id === p.matchId);
-      const pool = pools.find((pl) => pl.id === p.poolId);
-      if (!match || !pool) return null;
-      const settings = getPointsSettings(pool.id);
+      if (!match) return null;
+      const relevantPool = pools.find(
+        (pl) =>
+          pl.competitionId === match.competitionId &&
+          (pl.division === undefined || pl.division === match.division) &&
+          poolMembers.some((m) => m.poolId === pl.id && m.userId === currentUser.id)
+      );
+      const settings = relevantPool ? getPointsSettings(relevantPool.id) : DEFAULT_POINTS_SETTINGS;
       const points = scoreMatchPrediction(match, p, settings);
-      return { prediction: p, match, pool, points };
+      return { prediction: p, match, pool: relevantPool, points };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .sort((a, b) => new Date(b.match.date).getTime() - new Date(a.match.date).getTime())
@@ -143,7 +148,7 @@ function ProfileContent() {
                 className="flex items-center justify-between rounded-xl border border-border px-4 py-2.5 text-sm"
               >
                 <div>
-                  <p>{match.round} · {pool.name}</p>
+                  <p>{match.round}{pool ? ` · ${pool.name}` : ""}</p>
                   <p className="text-xs text-muted">
                     {formatDateLong(match.date, locale)} — jouw voorspelling {prediction.homeScore}-{prediction.awayScore}
                     {match.status === "finished" && ` · uitslag ${match.homeScore}-${match.awayScore}`}

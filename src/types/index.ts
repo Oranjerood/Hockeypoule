@@ -124,9 +124,11 @@ export interface PoolMember {
   department?: string; // optional, for company pool department leaderboards
 }
 
+// Predictions are scoped to the user + match only (not a specific pool),
+// so filling one in shows up immediately in every pool you're a member of
+// for that competition/division - you only ever predict a match once.
 export interface Prediction {
   id: string;
-  poolId: string;
   userId: string;
   matchId: string;
   homeScore: number;
@@ -135,9 +137,9 @@ export interface Prediction {
 }
 
 export interface SpecialPrediction {
-  poolId: string;
   userId: string;
   competitionId: string;
+  division?: Division; // e.g. separate champion pick for women's vs men's
   championTeamId?: string;
   finalistTeamIds?: string[]; // exactly 2
   topscorerNames?: string[]; // up to 3 picks, like Scorito - any correct pick counts
@@ -195,4 +197,12 @@ export interface Badge {
   title: string;
   description: string;
   icon: string; // lucide icon name, resolved in the UI
+}
+
+export interface ChatMessage {
+  id: string;
+  poolId: string;
+  userId: string;
+  text: string;
+  createdAt: string;
 }

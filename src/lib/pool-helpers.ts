@@ -75,8 +75,20 @@ export function computePoolLeaderboard(
   const memberIds = getMembersForPool(poolMembers, pool.id).map((m) => m.userId);
   const poolUsers = users.filter((u) => memberIds.includes(u.id));
   const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division);
-  const poolPredictions = predictions.filter((p) => p.poolId === pool.id);
-  const poolSpecials = specialPredictions.filter((sp) => sp.poolId === pool.id);
+  const matchIds = new Set(matches.map((m) => m.id));
+
+  // Predictions and special predictions are shared across every pool for
+  // the same competition/division (a user only ever predicts a match
+  // once) - filter by membership + relevant matches, not by pool.
+  const poolPredictions = predictions.filter(
+    (p) => memberIds.includes(p.userId) && matchIds.has(p.matchId)
+  );
+  const poolSpecials = specialPredictions.filter(
+    (sp) =>
+      memberIds.includes(sp.userId) &&
+      sp.competitionId === pool.competitionId &&
+      (sp.division === undefined || sp.division === pool.division)
+  );
 
   // The tournament is still in progress in the demo dataset, so there is no
   // confirmed champion/finalists/topscorer yet.
@@ -84,7 +96,6 @@ export function computePoolLeaderboard(
     championTeamId: undefined,
     finalistTeamIds: undefined,
     topscorerName: undefined,
-    surpriseTeamId: undefined,
   };
 
   return buildLeaderboard(

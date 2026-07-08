@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Trophy, Users, CalendarDays, ScrollText, BarChart3 } from "lucide-react";
+import { useLocale } from "next-intl";
+import { Trophy, Users, CalendarDays, ScrollText, BarChart3, MessageCircle } from "lucide-react";
 import RequireAuth from "@/components/RequireAuth";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -12,21 +13,26 @@ import ParticipantsTab from "@/components/pool/ParticipantsTab";
 import MatchesTab from "@/components/pool/MatchesTab";
 import RulesTab from "@/components/pool/RulesTab";
 import StatsTab from "@/components/pool/StatsTab";
+import ChatTab from "@/components/pool/ChatTab";
 import { useAppStore } from "@/lib/store";
 import PoolSwitcher from "@/components/PoolSwitcher";
 import {
   getMembersForPool,
   getMatchesForCompetition,
   computePoolLeaderboard,
+  computeOverallStandings,
   hasCompetitionAccess,
 } from "@/lib/pool-helpers";
 
-type Tab = "leaderboard" | "participants" | "matches" | "rules" | "stats";
+type Tab = "leaderboard" | "participants" | "matches" | "rules" | "stats" | "chat";
 
 function PoolDetailContent() {
   const params = useParams<{ poolId: string }>();
   const poolId = params.poolId;
   const t = useTranslations("PoolDetail");
+  const c = useTranslations("Common");
+  const tp = useTranslations("Pools");
+  const locale = useLocale();
 
   const currentUser = useAppStore((s) => s.currentUser());
   const pools = useAppStore((s) => s.pools);
@@ -48,9 +54,9 @@ function PoolDetailContent() {
   if (!pool || !currentUser) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <p className="text-muted">Poule niet gevonden.</p>
+        <p className="text-muted">{t("notFoundText")}</p>
         <Button href="/dashboard" className="mt-4">
-          Terug naar dashboard
+          {c("backToDashboard")}
         </Button>
       </div>
     );
@@ -75,19 +81,19 @@ function PoolDetailContent() {
         {canAccess ? (
           <>
             <p className="mt-2 text-sm text-muted">
-              Je bent nog geen deelnemer van deze poule.
+              {t("notMemberYet")}
             </p>
             <Button className="mt-6" onClick={() => joinPoolByCode(pool.inviteCode)}>
-              Deelnemen
+              {t("joinNow")}
             </Button>
           </>
         ) : (
           <>
             <p className="mt-2 text-sm text-muted">
-              Je hebt nog geen toegang tot de competitie van deze poule.
+              {t("noAccessYet")}
             </p>
             <Button className="mt-6" href={`/competitions/${pool.competitionId}`}>
-              Ga naar de competitie
+              {t("goToCompetition")}
             </Button>
           </>
         )}
@@ -105,12 +111,30 @@ function PoolDetailContent() {
     allMatches
   );
 
+  // When this is one of the two official national pools (women's/men's),
+  // also show the combined overall standings right here.
+  let overallStandings: ReturnType<typeof computeOverallStandings> = [];
+  if (pool.isNational && pool.division) {
+    const otherDivision = pool.division === "women" ? "men" : "women";
+    const otherPool = pools.find(
+      (p) => p.competitionId === pool.competitionId && p.isNational && p.division === otherDivision
+    );
+    if (otherPool) {
+      const otherSettings = getPointsSettings(otherPool.id);
+      overallStandings =
+        pool.division === "women"
+          ? computeOverallStandings(pool, otherPool, poolMembers, users, predictions, specialPredictions, settings, otherSettings, allMatches)
+          : computeOverallStandings(otherPool, pool, poolMembers, users, predictions, specialPredictions, otherSettings, settings, allMatches);
+    }
+  }
+
   const tabs: { id: Tab; label: string; icon: typeof Trophy }[] = [
     { id: "leaderboard", label: t("tabLeaderboard"), icon: Trophy },
     { id: "participants", label: t("tabParticipants"), icon: Users },
     { id: "matches", label: t("tabMatches"), icon: CalendarDays },
     { id: "rules", label: t("tabRules"), icon: ScrollText },
     { id: "stats", label: t("tabStats"), icon: BarChart3 },
+    ...(!pool.isNational ? [{ id: "chat" as Tab, label: c("chat"), icon: MessageCircle }] : []),
   ];
 
   return (
@@ -124,15 +148,15 @@ function PoolDetailContent() {
             <h1 className="text-2xl font-bold tracking-tight">{pool.name}</h1>
             {pool.division && (
               <Badge tone={pool.division === "women" ? "primary" : "neutral"} className="text-sm">
-                {pool.division === "women" ? "Vrouwen" : "Mannen"}
+                {pool.division === "women" ? c("women") : c("men")}
               </Badge>
             )}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            {pool.isNational && <Badge tone="primary">Officiële poule</Badge>}
-            {pool.isCompany && <Badge tone="primary">Bedrijfspoule</Badge>}
-            <Badge tone="neutral">{pool.visibility === "public" ? "Publiek" : "Privé"}</Badge>
-            {myMembership?.role === "owner" && <Badge tone="primary">Eigenaar</Badge>}
+            {pool.isNational && <Badge tone="primary">{c("officialPool")}</Badge>}
+            {pool.isCompany && <Badge tone="primary">{c("companyPool")}</Badge>}
+            <Badge tone="neutral">{pool.visibility === "public" ? tp("public") : tp("private")}</Badge>
+            {myMembership?.role === "owner" && <Badge tone="primary">{c("owner")}</Badge>}
           </div>
         </div>
       </div>
@@ -160,13 +184,28 @@ function PoolDetailContent() {
 
       <div className="mt-6">
         {tab === "leaderboard" && (
-          <LeaderboardTable rows={leaderboard} currentUserId={currentUser.id} />
+          <div className="space-y-8">
+            <LeaderboardTable rows={leaderboard} currentUserId={currentUser.id} />
+            {overallStandings.length > 0 && (
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+                  {t("overallTitle")}
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  {t("overallText")}
+                </p>
+                <div className="mt-4">
+                  <LeaderboardTable rows={overallStandings} currentUserId={currentUser.id} />
+                </div>
+              </div>
+            )}
+          </div>
         )}
         {tab === "participants" && (
           <ParticipantsTab pool={pool} members={members} users={users} />
         )}
         {tab === "matches" && (
-          <MatchesTab poolId={pool.id} matches={matches} settings={settings} />
+          <MatchesTab matches={matches} settings={settings} division={pool.division} />
         )}
         {tab === "rules" && (
           <RulesTab
@@ -179,12 +218,15 @@ function PoolDetailContent() {
           <StatsTab
             users={users.filter((u) => members.some((m) => m.userId === u.id))}
             matches={matches}
-            predictions={predictions.filter((p) => p.poolId === pool.id)}
+            predictions={predictions.filter((p) => matches.some((m) => m.id === p.matchId))}
             settings={settings}
             leaderboard={leaderboard}
             defaultUserId={currentUser.id}
             poolName={pool.name}
           />
+        )}
+        {tab === "chat" && !pool.isNational && (
+          <ChatTab poolId={pool.id} members={users.filter((u) => members.some((m) => m.userId === u.id))} />
         )}
       </div>
     </div>
