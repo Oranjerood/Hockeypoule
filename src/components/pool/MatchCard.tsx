@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Lock, MapPin } from "lucide-react";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
-import { formatDateLong } from "@/lib/utils";
+import { formatDateLong, teamName } from "@/lib/utils";
 import { isPredictionLocked, scoreMatchPrediction } from "@/lib/scoring";
 import type { Match, Prediction, PointsSettings, Team } from "@/types";
 
@@ -60,7 +60,7 @@ export default function MatchCard({
       <div className="mt-4 flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-2">
           <span className="text-2xl">{home.flagEmoji}</span>
-          <span className="font-medium">{home.name}</span>
+          <span className="font-medium">{teamName(home, locale)}</span>
         </div>
 
         {match.status === "finished" || match.status === "live" ? (
@@ -72,7 +72,7 @@ export default function MatchCard({
         )}
 
         <div className="flex flex-1 items-center justify-end gap-2 text-right">
-          <span className="font-medium">{away.name}</span>
+          <span className="font-medium">{teamName(away, locale)}</span>
           <span className="text-2xl">{away.flagEmoji}</span>
         </div>
       </div>

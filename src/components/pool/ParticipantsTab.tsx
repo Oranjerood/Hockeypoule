@@ -81,7 +81,6 @@ export default function ParticipantsTab({
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{user.name}</p>
-              <p className="truncate text-xs text-muted">{user.email}</p>
             </div>
             {member.role === "owner" && <Crown size={16} className="text-primary" />}
           </div>

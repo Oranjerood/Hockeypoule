@@ -50,3 +50,10 @@ export function initials(name: string): string {
     .slice(0, 2)
     .toUpperCase();
 }
+
+export function teamName(
+  team: { name: string; nameEn?: string },
+  locale: string
+): string {
+  return locale === "en" && team.nameEn ? team.nameEn : team.name;
+}

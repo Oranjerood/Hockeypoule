@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/store";
-import { formatDateLong } from "@/lib/utils";
+import { formatDateLong, teamName } from "@/lib/utils";
 import type { Team, Match } from "@/types";
 
 function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
@@ -25,7 +25,7 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
     <div className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
       <div className="min-w-0">
         <p className="text-sm font-medium">
-          {opponent ? `${opponent.flagEmoji} ${opponent.name}` : "TBD"}
+          {opponent ? `${opponent.flagEmoji} ${teamName(opponent, locale)}` : "TBD"}
         </p>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
           {formatDateLong(match.date, locale)} · {match.time}
@@ -70,6 +70,7 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
 
 function TeamPageContent() {
   const params = useParams<{ teamId: string }>();
+  const locale = useLocale();
   const teams = useAppStore((s) => s.teams);
   const matches = useAppStore((s) => s.matches);
 
@@ -104,7 +105,7 @@ function TeamPageContent() {
           {team.flagEmoji}
         </span>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{team.country}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{teamName(team, locale)}</h1>
           <p className="text-sm text-muted">FIH Hockey World Cup 2026</p>
         </div>
       </div>

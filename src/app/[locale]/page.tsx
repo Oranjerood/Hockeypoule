@@ -1,16 +1,17 @@
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Trophy, Target, TrendingUp, BarChart3, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { COMPETITIONS, TEAMS, getSport } from "@/data/mock-data";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, teamName } from "@/lib/utils";
 
 export default function HomePage() {
   const t = useTranslations("Home");
   const c = useTranslations("Common");
   const tc = useTranslations("Competitions");
+  const locale = useLocale();
 
   const steps = [
     { icon: Target, title: t("step1Title"), text: t("step1Text") },
@@ -37,7 +38,7 @@ export default function HomePage() {
     if (seenCountries.has(team.country)) return false;
     seenCountries.add(team.country);
     return true;
-  }).slice(0, 10);
+  }); // show every participating country, no cap
 
   return (
     <div>
@@ -79,7 +80,7 @@ export default function HomePage() {
                 href={`/teams/${team.id}`}
                 className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               >
-                <span className="text-base">{team.flagEmoji}</span> {team.country}
+                <span className="text-base">{team.flagEmoji}</span> {teamName(team, locale)}
               </Link>
             ))}
           </div>

@@ -41,9 +41,9 @@ function CompetitionHubContent() {
   const createCompany = useAppStore((s) => s.createCompany);
   const redeemCompanySeat = useAppStore((s) => s.redeemCompanySeat);
 
+  const [payFor, setPayFor] = useState<"self" | "group" | null>(null);
   const [supportAmount, setSupportAmount] = useState(0);
   const [customSupport, setCustomSupport] = useState("");
-  const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [companySeats, setCompanySeats] = useState(10);
   const [companyResult, setCompanyResult] = useState<{ inviteCode: string } | null>(null);
@@ -96,67 +96,82 @@ function CompetitionHubContent() {
           <h2 className="font-semibold">{t("accessTitle")}</h2>
           <p className="mt-1 text-sm text-muted">{t("accessText")}</p>
 
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-background px-4 py-3 text-sm">
-            <span className="text-muted">{t("entryFee")}</span>
-            <span className="font-semibold">{formatCurrency(competition.entryFeeCents, locale)}</span>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              onClick={() => setPayFor("self")}
+              className={`rounded-2xl border p-4 text-left transition-colors ${
+                payFor === "self" ? "border-primary bg-primary/5" : "border-border"
+              }`}
+            >
+              <span className="font-semibold">Alleen voor mezelf</span>
+              <p className="mt-1 text-sm text-muted">
+                Jij betaalt {formatCurrency(competition.entryFeeCents, locale)} en doet zelf mee.
+              </p>
+            </button>
+            <button
+              onClick={() => setPayFor("group")}
+              className={`rounded-2xl border p-4 text-left transition-colors ${
+                payFor === "group" ? "border-primary bg-primary/5" : "border-border"
+              }`}
+            >
+              <span className="flex items-center gap-1.5 font-semibold">
+                <Gift size={15} className="text-primary" /> Voor een groep (cadeau)
+              </span>
+              <p className="mt-1 text-sm text-muted">{t("companyOptionText")}</p>
+            </button>
           </div>
 
-          {competition.supportBeneficiaryName && (
-            <div className="mt-4">
-              <Label className="flex items-center gap-1.5">
-                <Heart size={13} className="text-primary" />
-                {t("supportLabel", { beneficiary: competition.supportBeneficiaryName })}
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORT_PRESETS.map((amount) => (
-                  <button
-                    key={amount}
-                    onClick={() => { setSupportAmount(amount); setCustomSupport(""); }}
-                    className={`rounded-full border px-3 py-1.5 text-sm ${
-                      supportAmount === amount && !customSupport
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-muted"
-                    }`}
-                  >
-                    {amount === 0 ? t("noExtra") : `+${formatCurrency(amount, locale)}`}
-                  </button>
-                ))}
-                <input
-                  placeholder={t("customAmount")}
-                  value={customSupport}
-                  onChange={(e) => {
-                    setCustomSupport(e.target.value);
-                    setSupportAmount(Math.round(Number(e.target.value || 0) * 100));
-                  }}
-                  className="w-28 rounded-full border border-border bg-surface px-3 py-1.5 text-sm"
+          {payFor === "self" && (
+            <div className="mt-6 border-t border-border pt-6">
+              <div className="flex items-center justify-between rounded-xl bg-background px-4 py-3 text-sm">
+                <span className="text-muted">{t("entryFee")}</span>
+                <span className="font-semibold">{formatCurrency(competition.entryFeeCents, locale)}</span>
+              </div>
+
+              {competition.supportBeneficiaryName && (
+                <div className="mt-4">
+                  <Label className="flex items-center gap-1.5">
+                    <Heart size={13} className="text-primary" />
+                    {t("supportLabel", { beneficiary: competition.supportBeneficiaryName })}
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SUPPORT_PRESETS.map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => { setSupportAmount(amount); setCustomSupport(""); }}
+                        className={`rounded-full border px-3 py-1.5 text-sm ${
+                          supportAmount === amount && !customSupport
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted"
+                        }`}
+                      >
+                        {amount === 0 ? t("noExtra") : `+${formatCurrency(amount, locale)}`}
+                      </button>
+                    ))}
+                    <input
+                      placeholder={t("customAmount")}
+                      value={customSupport}
+                      onChange={(e) => {
+                        setCustomSupport(e.target.value);
+                        setSupportAmount(Math.round(Number(e.target.value || 0) * 100));
+                      }}
+                      className="w-28 rounded-full border border-border bg-surface px-3 py-1.5 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <PaymentButton
+                  amountLabel={formatCurrency(totalAmountCents, locale)}
+                  onPaid={() => purchaseCompetitionAccess(competitionId, supportAmount)}
                 />
               </div>
             </div>
           )}
 
-          <div className="mt-6">
-            <PaymentButton
-              amountLabel={formatCurrency(totalAmountCents, locale)}
-              onPaid={() => purchaseCompetitionAccess(competitionId, supportAmount)}
-            />
-          </div>
-        </Card>
-
-        <Card className="mt-4 p-6">
-          <div className="flex items-center gap-2">
-            <Gift size={18} className="text-primary" />
-            <h2 className="font-semibold">{t("companyOption")}</h2>
-          </div>
-          <p className="mt-1 text-sm text-muted">{t("companyOptionText")}</p>
-
-          {!showCompanyForm && !companyResult && (
-            <Button variant="outline" className="mt-4" onClick={() => setShowCompanyForm(true)}>
-              <Gift size={15} /> {t("companyOption")}
-            </Button>
-          )}
-
-          {showCompanyForm && !companyResult && (
-            <div className="mt-4 space-y-3">
+          {payFor === "group" && !companyResult && (
+            <div className="mt-6 space-y-3 border-t border-border pt-6">
               <div>
                 <Label>{t("companyGroupName")}</Label>
                 <Input

@@ -197,27 +197,27 @@ export const useAppStore = create<AppState>()(
           purchasedAt: new Date().toISOString(),
         };
 
-        const nationalPool = pools.find(
+        // A competition can have more than one official pool (e.g. a
+        // separate women's and men's national pool) - join all of them,
+        // not just the first one found.
+        const nationalPools = pools.filter(
           (p) => p.competitionId === competitionId && p.isNational
         );
-        const alreadyMember = nationalPool
-          ? poolMembers.some((m) => m.poolId === nationalPool.id && m.userId === currentUserId)
-          : false;
+        const newMemberships: PoolMember[] = nationalPools
+          .filter(
+            (pool) =>
+              !poolMembers.some((m) => m.poolId === pool.id && m.userId === currentUserId)
+          )
+          .map((pool) => ({
+            poolId: pool.id,
+            userId: currentUserId,
+            role: "member" as const,
+            joinedAt: new Date().toISOString(),
+          }));
 
         set({
           competitionAccess: [...competitionAccess, access],
-          poolMembers:
-            nationalPool && !alreadyMember
-              ? [
-                  ...poolMembers,
-                  {
-                    poolId: nationalPool.id,
-                    userId: currentUserId,
-                    role: "member",
-                    joinedAt: new Date().toISOString(),
-                  },
-                ]
-              : poolMembers,
+          poolMembers: [...poolMembers, ...newMemberships],
         });
       },
 
@@ -257,12 +257,25 @@ export const useAppStore = create<AppState>()(
           companyId: company.id,
           purchasedAt: new Date().toISOString(),
         };
+        const nationalPools = pools.filter(
+          (p) => p.competitionId === input.competitionId && p.isNational
+        );
+        const nationalMemberships: PoolMember[] = nationalPools
+          .filter((p) => !poolMembers.some((m) => m.poolId === p.id && m.userId === ownerId))
+          .map((p) => ({
+            poolId: p.id,
+            userId: ownerId,
+            role: "member" as const,
+            joinedAt: new Date().toISOString(),
+          }));
+
         set({
           companies: [...companies, company],
           pools: [...pools, pool],
           poolMembers: [
             ...poolMembers,
             { poolId, userId: ownerId, role: "owner", joinedAt: new Date().toISOString() },
+            ...nationalMemberships,
           ],
           competitionAccess: [...competitionAccess, ownerAccess],
         });
@@ -270,7 +283,7 @@ export const useAppStore = create<AppState>()(
       },
 
       redeemCompanySeat: (code, department) => {
-        const { companies, competitionAccess, currentUserId, poolMembers } = get();
+        const { companies, competitionAccess, currentUserId, poolMembers, pools } = get();
         if (!currentUserId) return null;
         const company = companies.find(
           (c) => c.inviteCode.toLowerCase() === code.trim().toLowerCase()
@@ -283,9 +296,21 @@ export const useAppStore = create<AppState>()(
         const alreadyHasAccess = competitionAccess.some(
           (a) => a.competitionId === company.competitionId && a.userId === currentUserId
         );
-        const alreadyMember = poolMembers.some(
+        const alreadyMemberOfCompanyPool = poolMembers.some(
           (m) => m.poolId === company.poolId && m.userId === currentUserId
         );
+
+        const nationalPools = pools.filter(
+          (p) => p.competitionId === company.competitionId && p.isNational
+        );
+        const newNationalMemberships: PoolMember[] = nationalPools
+          .filter((p) => !poolMembers.some((m) => m.poolId === p.id && m.userId === currentUserId))
+          .map((p) => ({
+            poolId: p.id,
+            userId: currentUserId,
+            role: "member" as const,
+            joinedAt: new Date().toISOString(),
+          }));
 
         set({
           competitionAccess: alreadyHasAccess
@@ -302,18 +327,21 @@ export const useAppStore = create<AppState>()(
                   purchasedAt: new Date().toISOString(),
                 },
               ],
-          poolMembers: alreadyMember
-            ? poolMembers
-            : [
-                ...poolMembers,
-                {
-                  poolId: company.poolId,
-                  userId: currentUserId,
-                  role: "member",
-                  joinedAt: new Date().toISOString(),
-                  department,
-                },
-              ],
+          poolMembers: [
+            ...poolMembers,
+            ...(alreadyMemberOfCompanyPool
+              ? []
+              : [
+                  {
+                    poolId: company.poolId,
+                    userId: currentUserId,
+                    role: "member" as const,
+                    joinedAt: new Date().toISOString(),
+                    department,
+                  },
+                ]),
+            ...newNationalMemberships,
+          ],
         });
         return company;
       },
@@ -517,8 +545,8 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: "podium-storage",
-      version: 2,
+      name: "hockeypoule-storage-v3",
+      version: 3,
     }
   )
 );

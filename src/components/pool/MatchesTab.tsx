@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { CalendarClock } from "lucide-react";
 import MatchCard from "./MatchCard";
 import SpecialPredictionsPanel from "./SpecialPredictionsPanel";
 import { useAppStore } from "@/lib/store";
@@ -107,6 +108,22 @@ export default function MatchesTab({
           );
         })}
       </div>
+
+      {competitionId === "comp-wk-hockey-2026" && (
+        <div className="rounded-2xl border border-dashed border-border p-5">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <CalendarClock size={16} className="text-primary" />
+            Rest van het schema volgt
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Hierboven staat de volledige groepsfase (Poule A t/m D). De kruisfinales (21-24 aug),
+            plaatsingswedstrijden (27-28 aug) en halve finales, troostfinale en finale (29-30 aug)
+            hangen af van de eindstand in de groepsfase — precies zoals bij het echte toernooi zijn de
+            deelnemende teams daarvoor nog niet bekend. Zodra de groepsfase is afgerond voegen we deze
+            wedstrijden hier automatisch toe, met dezelfde functionaliteit.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

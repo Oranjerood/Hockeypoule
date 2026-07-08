@@ -38,6 +38,7 @@ export interface Team {
   id: string;
   competitionId: string;
   name: string;
+  nameEn?: string;
   country: string;
   flagEmoji: string;
   logoUrl?: string;

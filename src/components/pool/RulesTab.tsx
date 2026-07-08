@@ -15,7 +15,6 @@ const FIELDS: { key: keyof PointsSettings; labelKey: string }[] = [
   { key: "champion", labelKey: "champion" },
   { key: "finalist", labelKey: "finalist" },
   { key: "topscorer", labelKey: "topscorer" },
-  { key: "surpriseTeam", labelKey: "surpriseTeam" },
 ];
 
 export default function RulesTab({

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Lock } from "lucide-react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
 import { Label } from "../ui/Input";
 import type { SpecialPrediction, Team } from "@/types";
+import { teamName } from "@/lib/utils";
 
 export default function SpecialPredictionsPanel({
   teams,
@@ -25,18 +26,17 @@ export default function SpecialPredictionsPanel({
   }) => void;
 }) {
   const t = useTranslations("PoolDetail");
+  const locale = useLocale();
   const [champion, setChampion] = useState(prediction?.championTeamId ?? "");
   const [finalistA, setFinalistA] = useState(prediction?.finalistTeamIds?.[0] ?? "");
   const [finalistB, setFinalistB] = useState(prediction?.finalistTeamIds?.[1] ?? "");
   const [topscorer, setTopscorer] = useState(prediction?.topscorerName ?? "");
-  const [surprise, setSurprise] = useState(prediction?.surpriseTeamId ?? "");
 
   useEffect(() => {
     setChampion(prediction?.championTeamId ?? "");
     setFinalistA(prediction?.finalistTeamIds?.[0] ?? "");
     setFinalistB(prediction?.finalistTeamIds?.[1] ?? "");
     setTopscorer(prediction?.topscorerName ?? "");
-    setSurprise(prediction?.surpriseTeamId ?? "");
   }, [prediction]);
 
   return (
@@ -62,7 +62,7 @@ export default function SpecialPredictionsPanel({
             <option value="">—</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.flagEmoji} {team.name}
+                {team.flagEmoji} {teamName(team, locale)}
               </option>
             ))}
           </select>
@@ -80,7 +80,7 @@ export default function SpecialPredictionsPanel({
               <option value="">—</option>
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
-                  {team.flagEmoji} {team.name}
+                  {team.flagEmoji} {teamName(team, locale)}
                 </option>
               ))}
             </select>
@@ -93,7 +93,7 @@ export default function SpecialPredictionsPanel({
               <option value="">—</option>
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
-                  {team.flagEmoji} {team.name}
+                  {team.flagEmoji} {teamName(team, locale)}
                 </option>
               ))}
             </select>
@@ -111,22 +111,6 @@ export default function SpecialPredictionsPanel({
           />
         </div>
 
-        <div>
-          <Label>{t("surpriseTeam")}</Label>
-          <select
-            disabled={locked}
-            value={surprise}
-            onChange={(e) => setSurprise(e.target.value)}
-            className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
-          >
-            <option value="">—</option>
-            {teams.map((team) => (
-              <option key={team.id} value={team.id}>
-                {team.flagEmoji} {team.name}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {!locked && (
@@ -137,7 +121,6 @@ export default function SpecialPredictionsPanel({
               championTeamId: champion || undefined,
               finalistTeamIds: finalistA && finalistB ? [finalistA, finalistB] : undefined,
               topscorerName: topscorer || undefined,
-              surpriseTeamId: surprise || undefined,
             })
           }
         >
