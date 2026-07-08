@@ -144,7 +144,8 @@
     "redeemButton": "Code inwisselen",
     "createCustom": "Maak je eigen competitie",
     "createCustomText": "Voetbal, basketbal, je eigen vriendengroep of klasse — upload je teams en ga los.",
-    "createCustomButton": "Competitie aanmaken"
+    "createCustomButton": "Competitie aanmaken",
+    "bulkDiscountNote": "Meer dan 15 personen? Mail ons op hockeypoule@gmail.com voor een passende deal."
   },
   "Pools": {
     "createTitle": "Nieuwe poule maken",
@@ -263,7 +264,7 @@
     "statusLive": "Bezig",
     "statusUpcoming": "Nog te spelen",
     "kingQueenTitle": "Word koning/koningin van {team}",
-    "kingQueenText": "Voorspel dit land specifiek en strijd tegen andere fans van dit team om de titel.",
+    "kingQueenText": "Geen zin om het hele toernooi te voorspellen? Voorspel dan gewoon de wedstrijden van dit land hierboven en word koning/koningin van {team}.",
     "kingQueenLoginCta": "Log in om mee te doen",
     "kingQueenFollowButton": "Word koning/koningin van dit land",
     "kingQueenFollowing": "Jij bent kandidaat",

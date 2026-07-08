@@ -20,10 +20,6 @@ export default function Footer() {
             <p className="mt-2 max-w-sm text-sm text-muted">{t("footerTagline")}</p>
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-            <Link href="/" className="hover:text-foreground">{c("appName")}</Link>
-            <Link href="/wk" className="hover:text-foreground">{c("wkNav")}</Link>
-            <Link href="/pools/join" className="hover:text-foreground">{t("ctaJoin")}</Link>
-            <Link href="/competitions/comp-wk-hockey-2026" className="hover:text-foreground">{t("ctaCreate")}</Link>
             <Link href="/#over-ons" className="hover:text-foreground">{t("aboutNav")}</Link>
           </nav>
         </div>

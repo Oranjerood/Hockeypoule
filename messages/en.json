@@ -144,7 +144,8 @@
     "redeemButton": "Redeem code",
     "createCustom": "Create your own competition",
     "createCustomText": "Football, basketball, your own friend group or league — upload your teams and go.",
-    "createCustomButton": "Create competition"
+    "createCustomButton": "Create competition",
+    "bulkDiscountNote": "More than 15 people? Email us at hockeypoule@gmail.com for a group deal."
   },
   "Pools": {
     "createTitle": "Create a new pool",
@@ -263,7 +264,7 @@
     "statusLive": "Live",
     "statusUpcoming": "Upcoming",
     "kingQueenTitle": "Become king/queen of {team}",
-    "kingQueenText": "Predict this country specifically and compete against other fans of this team for the title.",
+    "kingQueenText": "Not up for predicting the whole tournament? Just predict this country's matches above and become king/queen of {team}.",
     "kingQueenLoginCta": "Log in to join",
     "kingQueenFollowButton": "Become king/queen of this country",
     "kingQueenFollowing": "You're a candidate",

@@ -2,10 +2,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Trophy, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle, Mail, Heart } from "lucide-react";
 import {
-  JoinPoolIllustration,
-  PredictScoreIllustration,
-  CollectPointsIllustration,
-  LeaderboardIllustration,
+  JoinPoolMockup,
+  PredictScoreMockup,
+  CollectPointsMockup,
+  LeaderboardMockup,
 } from "@/components/StepIllustrations";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -20,10 +20,10 @@ export default function HomePage() {
   const locale = useLocale();
 
   const steps = [
-    { illustration: JoinPoolIllustration, title: t("step1Title"), text: t("step1Text") },
-    { illustration: PredictScoreIllustration, title: t("step2Title"), text: t("step2Text") },
-    { illustration: CollectPointsIllustration, title: t("step3Title"), text: t("step3Text") },
-    { illustration: LeaderboardIllustration, title: t("step4Title"), text: t("step4Text") },
+    { Illustration: JoinPoolMockup, title: t("step1Title"), text: t("step1Text") },
+    { Illustration: PredictScoreMockup, title: t("step2Title"), text: t("step2Text") },
+    { Illustration: CollectPointsMockup, title: t("step3Title"), text: t("step3Text") },
+    { Illustration: LeaderboardMockup, title: t("step4Title"), text: t("step4Text") },
   ];
 
   const features = [
@@ -145,9 +145,7 @@ export default function HomePage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
             <Card key={step.title} className="p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                <step.illustration />
-              </div>
+              <step.Illustration />
               <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted">
                 {i + 1}
               </div>
@@ -202,7 +200,7 @@ export default function HomePage() {
 
       {/* CTA band */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <Card className="flex flex-col items-start gap-6 bg-header p-8 text-white sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-start gap-6 rounded-2xl bg-header p-8 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-xl font-bold">{t("ctaNational")}</h3>
             <p className="mt-1 text-white/70">{t("heroSubtitle")}</p>
@@ -213,7 +211,7 @@ export default function HomePage() {
               {c("login")}
             </Button>
           </div>
-        </Card>
+        </div>
       </section>
     </div>
   );

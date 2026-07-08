@@ -216,6 +216,9 @@ function CompetitionHubContent() {
                   onChange={(e) => setCompanySeats(Number(e.target.value))}
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
                 />
+                {companySeats > 15 && (
+                  <p className="mt-1.5 text-xs text-muted">{t("bulkDiscountNote")}</p>
+                )}
               </div>
 
               {competition.supportBeneficiaryName && (
