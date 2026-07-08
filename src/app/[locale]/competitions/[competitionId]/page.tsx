@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Trophy, Gift, Ticket, Heart } from "lucide-react";
+import { Trophy, Gift, Ticket, Heart, Upload } from "lucide-react";
 import RequireAuth from "@/components/RequireAuth";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -17,7 +17,7 @@ import LeaderboardTable from "@/components/pool/LeaderboardTable";
 import { Link } from "@/i18n/navigation";
 import { formatCurrency } from "@/lib/utils";
 
-const SUPPORT_PRESETS = [0, 500, 1000, 2500];
+const SUPPORT_PRESETS = [0, 200, 500, 1000, 2500];
 
 function CompetitionHubContent() {
   const params = useParams<{ competitionId: string }>();
@@ -45,6 +45,7 @@ function CompetitionHubContent() {
   const [supportAmount, setSupportAmount] = useState(0);
   const [customSupport, setCustomSupport] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [companyLogo, setCompanyLogo] = useState<string | undefined>();
   const [companySeats, setCompanySeats] = useState(10);
   const [companyResult, setCompanyResult] = useState<{ inviteCode: string } | null>(null);
   const [redeemCode, setRedeemCode] = useState("");
@@ -158,6 +159,7 @@ function CompetitionHubContent() {
                       className="w-28 rounded-full border border-border bg-surface px-3 py-1.5 text-sm"
                     />
                   </div>
+                  <p className="mt-2 text-xs text-muted">{t("supportNote")}</p>
                 </div>
               )}
 
@@ -181,6 +183,30 @@ function CompetitionHubContent() {
                 />
               </div>
               <div>
+                <Label>{t("companyLogo")}</Label>
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted hover:border-primary hover:text-primary">
+                  {companyLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={companyLogo} alt="logo" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <Upload size={18} />
+                  )}
+                  {t("companyUploadLogo")}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setCompanyLogo(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+              </div>
+              <div>
                 <Label>{t("companySeatsLabel")}</Label>
                 <input
                   type="number"
@@ -190,19 +216,55 @@ function CompetitionHubContent() {
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
                 />
               </div>
+
+              {competition.supportBeneficiaryName && (
+                <div>
+                  <Label className="flex items-center gap-1.5">
+                    <Heart size={13} className="text-primary" />
+                    {t("supportLabel", { beneficiary: competition.supportBeneficiaryName })}
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SUPPORT_PRESETS.map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => { setSupportAmount(amount); setCustomSupport(""); }}
+                        className={`rounded-full border px-3 py-1.5 text-sm ${
+                          supportAmount === amount && !customSupport
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted"
+                        }`}
+                      >
+                        {amount === 0 ? t("noExtra") : `+${formatCurrency(amount, locale)}`}
+                      </button>
+                    ))}
+                    <input
+                      placeholder={t("customAmount")}
+                      value={customSupport}
+                      onChange={(e) => {
+                        setCustomSupport(e.target.value);
+                        setSupportAmount(Math.round(Number(e.target.value || 0) * 100));
+                      }}
+                      className="w-28 rounded-full border border-border bg-surface px-3 py-1.5 text-sm"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-muted">{t("supportNote")}</p>
+                </div>
+              )}
+
               <div className="flex items-center justify-between rounded-xl bg-background px-4 py-3 text-sm">
                 <span className="text-muted">Totaalprijs</span>
                 <span className="font-semibold">
-                  {formatCurrency(competition.entryFeeCents * companySeats, locale)}
+                  {formatCurrency(competition.entryFeeCents * companySeats + supportAmount, locale)}
                 </span>
               </div>
               <PaymentButton
-                amountLabel={formatCurrency(competition.entryFeeCents * companySeats, locale)}
+                amountLabel={formatCurrency(competition.entryFeeCents * companySeats + supportAmount, locale)}
                 onPaid={() => {
                   const company = createCompany({
                     name: companyName || "Mijn groep",
                     competitionId,
                     seats: companySeats,
+                    logoUrl: companyLogo,
                   });
                   setCompanyResult({ inviteCode: company.inviteCode });
                 }}

@@ -8,6 +8,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/store";
 import { formatDateLong, teamName } from "@/lib/utils";
+import { computeGroupStandings } from "@/lib/standings";
 import type { Team, Match } from "@/types";
 
 function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
@@ -45,7 +46,64 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
   );
 }
 
+function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; allTeams: Team[]; matches: Match[]; locale: string }) {
+  if (!team.group) return null;
+
+  const groupTeams = allTeams.filter(
+    (t) => t.competitionId === team.competitionId && t.division === team.division && t.group === team.group
+  );
+  const groupMatches = matches.filter(
+    (m) => m.competitionId === team.competitionId && m.division === team.division && m.group === team.group
+  );
+  const standings = computeGroupStandings(groupTeams.map((t) => t.id), groupMatches);
+
+  return (
+    <div>
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">Stand {team.group}</h4>
+      <div className="mt-2 overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[360px] text-sm">
+          <thead>
+            <tr className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
+              <th className="px-3 py-2 font-medium">#</th>
+              <th className="px-3 py-2 font-medium">Team</th>
+              <th className="px-2 py-2 text-right font-medium">W</th>
+              <th className="px-2 py-2 text-right font-medium">G</th>
+              <th className="px-2 py-2 text-right font-medium">V</th>
+              <th className="px-2 py-2 text-right font-medium">DS</th>
+              <th className="px-2 py-2 text-right font-medium">Pt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {standings.map((row, index) => {
+              const rowTeam = groupTeams.find((t) => t.id === row.teamId);
+              return (
+                <tr
+                  key={row.teamId}
+                  className={`border-b border-border last:border-0 ${row.teamId === team.id ? "bg-primary/5" : ""}`}
+                >
+                  <td className="px-3 py-2">{index + 1}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {rowTeam?.flagEmoji} {rowTeam ? teamName(rowTeam, locale) : "?"}
+                  </td>
+                  <td className="px-2 py-2 text-right">{row.won}</td>
+                  <td className="px-2 py-2 text-right">{row.drawn}</td>
+                  <td className="px-2 py-2 text-right">{row.lost}</td>
+                  <td className="px-2 py-2 text-right">
+                    {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+                  </td>
+                  <td className="px-2 py-2 text-right font-semibold">{row.points}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams: Team[]; matches: Match[] }) {
+  const locale = useLocale();
   const teamMatches = matches
     .filter((m) => m.homeTeamId === team.id || m.awayTeamId === team.id)
     .sort((a, b) => new Date(a.date + "T" + a.time).getTime() - new Date(b.date + "T" + b.time).getTime());
@@ -55,14 +113,17 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
       <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
         {team.division === "women" ? "Vrouwen" : team.division === "men" ? "Mannen" : "Wedstrijden"}
       </h3>
-      <div className="mt-3 space-y-2">
-        {teamMatches.length === 0 ? (
-          <p className="text-sm text-muted">Nog geen wedstrijden bekend.</p>
-        ) : (
-          teamMatches.map((match) => (
-            <TeamMatchRow key={match.id} match={match} team={team} allTeams={allTeams} />
-          ))
-        )}
+      <div className="mt-3 grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">
+          {teamMatches.length === 0 ? (
+            <p className="text-sm text-muted">Nog geen wedstrijden bekend.</p>
+          ) : (
+            teamMatches.map((match) => (
+              <TeamMatchRow key={match.id} match={match} team={team} allTeams={allTeams} />
+            ))
+          )}
+        </div>
+        <GroupStandingsTable team={team} allTeams={allTeams} matches={matches} locale={locale} />
       </div>
     </div>
   );

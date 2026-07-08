@@ -108,7 +108,11 @@ export default function HomePage() {
                   <p className="mt-1 text-sm text-muted">{sport?.name} · {comp.season}</p>
                   <div className="mt-auto flex items-center justify-between pt-6 text-sm">
                     <span className="font-medium text-primary">
-                      {comp.entryFeeCents > 0 ? formatCurrency(comp.entryFeeCents, "nl") : "Gratis"}
+                      {comp.comingSoon
+                        ? c("comingSoon")
+                        : comp.entryFeeCents > 0
+                        ? formatCurrency(comp.entryFeeCents, locale)
+                        : "Gratis"}
                     </span>
                     <ArrowRight size={16} className="text-muted" />
                   </div>

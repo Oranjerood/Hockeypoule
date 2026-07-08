@@ -58,6 +58,11 @@ interface CustomCompetitionInput {
   customSportName?: string;
   season: string;
   teams: { name: string; country?: string; flagEmoji?: string }[];
+  poolCount?: number;
+  roundRobinType?: "single" | "double";
+  startDate?: string;
+  startTime?: string;
+  location?: string;
 }
 
 interface AppState {
@@ -369,17 +374,68 @@ export const useAppStore = create<AppState>()(
           entryFeeCents: 0,
           createdBy: currentUserId ?? undefined,
         };
+        const poolCount = Math.max(1, input.poolCount ?? 1);
+        const poolLetters = "ABCDEFGH";
         const newTeams: Team[] = input.teams.map((team, i) => ({
           id: `team-custom-${Date.now()}-${i}`,
           competitionId,
           name: team.name,
           country: team.country ?? "—",
           flagEmoji: team.flagEmoji ?? "🏳️",
+          group: poolCount > 1 ? `Poule ${poolLetters[i % poolCount]}` : undefined,
         }));
+
+        // Generate a round-robin schedule per pool (everyone plays everyone
+        // once, or twice home-and-away if requested).
+        const double = input.roundRobinType === "double";
+        const startDate = input.startDate || competition.startDate;
+        const startTime = input.startTime || "12:00";
+        const groupNames = poolCount > 1 ? poolLetters.slice(0, poolCount).split("").map((l) => `Poule ${l}`) : [undefined];
+        const newMatches: Match[] = [];
+        let matchCounter = 0;
+        for (const groupName of groupNames) {
+          const poolTeams = groupName
+            ? newTeams.filter((t) => t.group === groupName)
+            : newTeams;
+          for (let i = 0; i < poolTeams.length; i++) {
+            for (let j = i + 1; j < poolTeams.length; j++) {
+              matchCounter += 1;
+              newMatches.push({
+                id: `match-custom-${Date.now()}-${matchCounter}`,
+                competitionId,
+                homeTeamId: poolTeams[i].id,
+                awayTeamId: poolTeams[j].id,
+                date: startDate,
+                time: startTime,
+                location: input.location ?? "",
+                group: groupName,
+                round: groupName ? `Groepsfase - ${groupName}` : "Groepsfase",
+                status: "upcoming",
+              });
+              if (double) {
+                matchCounter += 1;
+                newMatches.push({
+                  id: `match-custom-${Date.now()}-${matchCounter}`,
+                  competitionId,
+                  homeTeamId: poolTeams[j].id,
+                  awayTeamId: poolTeams[i].id,
+                  date: startDate,
+                  time: startTime,
+                  location: input.location ?? "",
+                  group: groupName,
+                  round: groupName ? `Groepsfase - ${groupName} (return)` : "Groepsfase (return)",
+                  status: "upcoming",
+                });
+              }
+            }
+          }
+        }
+
         set({
           sports: nextSports,
           competitions: [...competitions, competition],
           teams: [...teams, ...newTeams],
+          matches: [...get().matches, ...newMatches],
         });
         return competition;
       },
