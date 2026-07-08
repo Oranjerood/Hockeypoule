@@ -34,7 +34,8 @@
     "chatUnknown": "Unknown",
     "chatPlaceholder": "Type a message...",
     "chatSend": "Send",
-    "predictions": "My predictions"
+    "predictions": "My predictions",
+    "wkNav": "World Cup"
   },
   "Home": {
     "heroTitle": "Be the expert of your team",
@@ -63,7 +64,13 @@
     "featureMultiSportText": "From the Hockey World Cup to the Hoofdklasse or your own friend group — upload your own competition.",
     "featureCompany": "Company pools",
     "featureCompanyText": "Pay once for the whole company, employees join for free with their own leaderboard.",
-    "footerTagline": "One platform for predicting, every sport, every competition."
+    "footerTagline": "One platform for predicting, every sport, every competition.",
+    "aboutTitle": "About HockeyPoule",
+    "aboutText": "HockeyPoule is an idea from Oranje-Rood Dames 1, born from a love of the game and the wish to let everyone — teammates, family, colleagues and friends — join in predicting big tournaments. Part of the proceeds go straight to the Oranje-Rood Dames 1 team fund.",
+    "aboutSponsorTitle": "Sponsor us or support the team",
+    "aboutSponsorText": "Want to sponsor HockeyPoule, advertise, or support the team in another way? Email us — we'd love to hear from you.",
+    "feedbackText": "Questions or feedback? Email us at hockeypoule@gmail.com",
+    "aboutNav": "About us"
   },
   "Auth": {
     "loginTitle": "Welcome back",
@@ -276,5 +283,11 @@
     "subtitle": "Enter all your predictions here. They automatically count for every pool you're in — you only ever predict a match once.",
     "noAccess": "You don't have access to a competition to predict yet.",
     "browseCompetitions": "Browse competitions"
+  },
+  "WkOverview": {
+    "subtitle": "All participating countries, pool draw and the current group-stage standings — for both the women's and men's tournament.",
+    "ctaTitle": "Join in and predict the whole tournament",
+    "ctaText": "One-time access, then unlimited free pools for yourself, family or colleagues.",
+    "ctaButton": "Predict the World Cup"
   }
 }

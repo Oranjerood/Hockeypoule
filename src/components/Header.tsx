@@ -16,14 +16,16 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const currentUser = useAppStore((s) => s.currentUser());
 
+  const publicLinks = [{ href: "/wk", label: t("wkNav") }];
   const navLinks = currentUser
     ? [
+        ...publicLinks,
         { href: "/dashboard", label: t("dashboard") },
         { href: "/predictions", label: t("predictions") },
         { href: "/profile", label: t("profile") },
         ...(currentUser.isAdmin ? [{ href: "/admin", label: t("admin") }] : []),
       ]
-    : [];
+    : publicLinks;
 
   return (
     <header className="sticky top-0 z-40 bg-header text-white">

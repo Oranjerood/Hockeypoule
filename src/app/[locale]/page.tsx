@@ -1,6 +1,12 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Trophy, Target, TrendingUp, BarChart3, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle } from "lucide-react";
+import { Trophy, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle, Mail, Heart } from "lucide-react";
+import {
+  JoinPoolIllustration,
+  PredictScoreIllustration,
+  CollectPointsIllustration,
+  LeaderboardIllustration,
+} from "@/components/StepIllustrations";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -14,10 +20,10 @@ export default function HomePage() {
   const locale = useLocale();
 
   const steps = [
-    { icon: Target, title: t("step1Title"), text: t("step1Text") },
-    { icon: TrendingUp, title: t("step2Title"), text: t("step2Text") },
-    { icon: Trophy, title: t("step3Title"), text: t("step3Text") },
-    { icon: BarChart3, title: t("step4Title"), text: t("step4Text") },
+    { illustration: JoinPoolIllustration, title: t("step1Title"), text: t("step1Text") },
+    { illustration: PredictScoreIllustration, title: t("step2Title"), text: t("step2Text") },
+    { illustration: CollectPointsIllustration, title: t("step3Title"), text: t("step3Text") },
+    { illustration: LeaderboardIllustration, title: t("step4Title"), text: t("step4Text") },
   ];
 
   const features = [
@@ -139,8 +145,8 @@ export default function HomePage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
             <Card key={step.title} className="p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <step.icon size={20} />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <step.illustration />
               </div>
               <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted">
                 {i + 1}
@@ -169,6 +175,28 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="over-ons" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card className="p-8">
+            <h2 className="text-xl font-bold tracking-tight">{t("aboutTitle")}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">{t("aboutText")}</p>
+          </Card>
+          <Card className="flex flex-col justify-center gap-3 p-8">
+            <div className="flex items-center gap-2 font-semibold">
+              <Heart size={18} className="text-primary" /> {t("aboutSponsorTitle")}
+            </div>
+            <p className="text-sm text-muted">{t("aboutSponsorText")}</p>
+            <a
+              href="mailto:hockeypoule@gmail.com"
+              className="mt-1 inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
+            >
+              <Mail size={15} /> hockeypoule@gmail.com
+            </a>
+          </Card>
         </div>
       </section>
 

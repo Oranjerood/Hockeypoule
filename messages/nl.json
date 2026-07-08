@@ -34,7 +34,8 @@
     "chatUnknown": "Onbekend",
     "chatPlaceholder": "Typ een bericht...",
     "chatSend": "Versturen",
-    "predictions": "Mijn voorspellingen"
+    "predictions": "Mijn voorspellingen",
+    "wkNav": "WK Hockey"
   },
   "Home": {
     "heroTitle": "Wees de kenner van jouw team",
@@ -63,7 +64,13 @@
     "featureMultiSportText": "Van het WK Hockey tot de Hoofdklasse of je eigen vriendengroep — upload zelf je competitie.",
     "featureCompany": "Bedrijfspoules",
     "featureCompanyText": "Eén keer betalen voor het hele bedrijf, medewerkers spelen gratis mee met een eigen leaderboard.",
-    "footerTagline": "Eén platform voor voorspellen, elke sport, elke competitie."
+    "footerTagline": "Eén platform voor voorspellen, elke sport, elke competitie.",
+    "aboutTitle": "Over HockeyPoule",
+    "aboutText": "HockeyPoule is een idee van Oranje-Rood Dames 1, geboren uit liefde voor het spel en de wens om iedereen — teamgenoten, familie, collega's en vrienden — mee te laten voorspellen tijdens grote toernooien. Een deel van de opbrengst gaat direct naar de teampot van Oranje-Rood Dames 1.",
+    "aboutSponsorTitle": "Sponsor ons of steun het team",
+    "aboutSponsorText": "Wil je HockeyPoule sponsoren, adverteren of het team op een andere manier steunen? Mail ons — we horen graag van je.",
+    "feedbackText": "Vragen of feedback? Mail ons op hockeypoule@gmail.com",
+    "aboutNav": "Over ons"
   },
   "Auth": {
     "loginTitle": "Welkom terug",
@@ -276,5 +283,11 @@
     "subtitle": "Vul hier al je voorspellingen in. Ze gelden automatisch voor alle poules waarin je meedoet — je hoeft een wedstrijd maar één keer te voorspellen.",
     "noAccess": "Je hebt nog geen toegang tot een competitie om te voorspellen.",
     "browseCompetitions": "Bekijk competities"
+  },
+  "WkOverview": {
+    "subtitle": "Alle deelnemende landen, poule-indeling en de actuele tussenstand van de groepsfase — voor zowel het vrouwen- als het mannentoernooi.",
+    "ctaTitle": "Doe mee en voorspel het hele toernooi",
+    "ctaText": "Eenmalige toegang, daarna onbeperkt gratis poules voor jezelf, familie of collega's.",
+    "ctaButton": "Voorspel de WK"
   }
 }

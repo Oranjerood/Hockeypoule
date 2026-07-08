@@ -8,9 +8,9 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/store";
 import { formatDateLong, teamName } from "@/lib/utils";
-import { computeGroupStandings } from "@/lib/standings";
 import { computeCountryLeaderboard } from "@/lib/pool-helpers";
 import Button from "@/components/ui/Button";
+import SharedGroupStandingsTable from "@/components/GroupStandingsTable";
 import type { Team, Match } from "@/types";
 
 function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
@@ -50,7 +50,6 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
 }
 
 function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; allTeams: Team[]; matches: Match[]; locale: string }) {
-  const t = useTranslations("Team");
   if (!team.group) return null;
 
   const groupTeams = allTeams.filter(
@@ -59,50 +58,15 @@ function GroupStandingsTable({ team, allTeams, matches, locale }: { team: Team; 
   const groupMatches = matches.filter(
     (m) => m.competitionId === team.competitionId && m.division === team.division && m.group === team.group
   );
-  const standings = computeGroupStandings(groupTeams.map((t) => t.id), groupMatches);
 
   return (
-    <div>
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted">{t("standings", { group: team.group })}</h4>
-      <div className="mt-2 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[360px] text-sm">
-          <thead>
-            <tr className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
-              <th className="px-3 py-2 font-medium">#</th>
-              <th className="px-3 py-2 font-medium">{t("team")}</th>
-              <th className="px-2 py-2 text-right font-medium">{t("won")}</th>
-              <th className="px-2 py-2 text-right font-medium">{t("drawn")}</th>
-              <th className="px-2 py-2 text-right font-medium">{t("lost")}</th>
-              <th className="px-2 py-2 text-right font-medium">{t("goalDifference")}</th>
-              <th className="px-2 py-2 text-right font-medium">{t("points")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map((row, index) => {
-              const rowTeam = groupTeams.find((t) => t.id === row.teamId);
-              return (
-                <tr
-                  key={row.teamId}
-                  className={`border-b border-border last:border-0 ${row.teamId === team.id ? "bg-primary/5" : ""}`}
-                >
-                  <td className="px-3 py-2">{index + 1}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">
-                    {rowTeam?.flagEmoji} {rowTeam ? teamName(rowTeam, locale) : "?"}
-                  </td>
-                  <td className="px-2 py-2 text-right">{row.won}</td>
-                  <td className="px-2 py-2 text-right">{row.drawn}</td>
-                  <td className="px-2 py-2 text-right">{row.lost}</td>
-                  <td className="px-2 py-2 text-right">
-                    {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-                  </td>
-                  <td className="px-2 py-2 text-right font-semibold">{row.points}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <SharedGroupStandingsTable
+      groupName={team.group}
+      groupTeams={groupTeams}
+      groupMatches={groupMatches}
+      locale={locale}
+      highlightTeamId={team.id}
+    />
   );
 }
 

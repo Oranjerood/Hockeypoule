@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Trophy } from "lucide-react";
+import { Trophy, Mail } from "lucide-react";
 
 export default function Footer() {
   const t = useTranslations("Home");
@@ -21,11 +21,19 @@ export default function Footer() {
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
             <Link href="/" className="hover:text-foreground">{c("appName")}</Link>
+            <Link href="/wk" className="hover:text-foreground">{c("wkNav")}</Link>
             <Link href="/pools/join" className="hover:text-foreground">{t("ctaJoin")}</Link>
             <Link href="/competitions/comp-wk-hockey-2026" className="hover:text-foreground">{t("ctaCreate")}</Link>
+            <Link href="/#over-ons" className="hover:text-foreground">{t("aboutNav")}</Link>
           </nav>
         </div>
-        <p className="mt-8 text-xs text-muted">
+        <a
+          href="mailto:hockeypoule@gmail.com"
+          className="mt-6 flex w-fit items-center gap-1.5 text-sm text-muted hover:text-foreground"
+        >
+          <Mail size={14} /> {t("feedbackText")}
+        </a>
+        <p className="mt-4 text-xs text-muted">
           © {new Date().getFullYear()} {c("appName")} — Powered by Oranje-Rood Dames 1
         </p>
       </div>
