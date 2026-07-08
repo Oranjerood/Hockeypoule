@@ -38,7 +38,7 @@
     "wkNav": "WK Hockey"
   },
   "Home": {
-    "heroTitle": "Wees de kenner van jouw team",
+    "heroTitle": "Voorspel slimmer dan je vrienden, familie of collega's",
     "heroSubtitle": "Voorspel het WK Hockey, en straks ook de Hoofdklasse of je eigen competitie. Maak een poule met vrienden, familie of collega's en strijd om de eerste plek.",
     "ctaCreate": "Maak je eigen poule",
     "ctaJoin": "Ik heb een poulecode",
@@ -68,7 +68,7 @@
     "aboutTitle": "Over HockeyPoule",
     "aboutText": "HockeyPoule is een idee van Oranje-Rood Dames 1, geboren uit liefde voor het spel en de wens om iedereen — teamgenoten, familie, collega's en vrienden — mee te laten voorspellen tijdens grote toernooien. Een deel van de opbrengst gaat direct naar de teampot van Oranje-Rood Dames 1.",
     "aboutSponsorTitle": "Sponsor ons of steun het team",
-    "aboutSponsorText": "Wil je HockeyPoule sponsoren, adverteren of het team op een andere manier steunen? Mail ons — we horen graag van je.",
+    "aboutSponsorText": "Wil je Oranje-Rood Dames 1 sponsoren, adverteren of het team op een andere manier steunen? Mail ons — we horen graag van je.",
     "feedbackText": "Vragen of feedback? Mail ons op hockeypoule@gmail.com",
     "aboutNav": "Over ons"
   },
@@ -175,7 +175,13 @@
     "needsAccessText": "Je hebt nog geen toegang tot de competitie van deze poule.",
     "predictForWhom": "Voor wie voorspel je?",
     "predictForWhomNote": "Deze poule voorspelt alleen dit toernooi — maak een tweede poule als je ook de andere wilt spelen.",
-    "goToCompetition": "Ga naar de competitie"
+    "goToCompetition": "Ga naar de competitie",
+    "predictScope": "Voorspel je het hele toernooi of één land?",
+    "scopeFull": "Heel het toernooi",
+    "scopeFullText": "Voorspel alle wedstrijden van dit toernooi.",
+    "scopeCountry": "Eén land",
+    "scopeCountryText": "Geen zin in het hele toernooi? Kies één land en voorspel alleen hun wedstrijden — minder werk, en je wordt koning/koningin van dat land in deze poule.",
+    "scopeCountryPlaceholder": "Kies een land..."
   },
   "PoolDetail": {
     "notFoundText": "Poule niet gevonden.",
@@ -263,15 +269,7 @@
     "statusFinished": "Afgelopen",
     "statusLive": "Bezig",
     "statusUpcoming": "Nog te spelen",
-    "kingQueenTitle": "Word koning/koningin van {team}",
-    "kingQueenText": "Geen zin om het hele toernooi te voorspellen? Voorspel dan gewoon de wedstrijden van dit land hierboven en word koning/koningin van {team}.",
-    "kingQueenLoginCta": "Log in om mee te doen",
-    "kingQueenFollowButton": "Word koning/koningin van dit land",
-    "kingQueenFollowing": "Jij bent kandidaat",
-    "kingQueenUnfollow": "Stop met volgen",
-    "kingQueenSwitchNote": "Je volgt momenteel een ander land voor dit toernooi — kiezen voor dit land vervangt die keuze.",
-    "kingQueenLeaderboard": "Ranglijst koning/koningin",
-    "kingQueenEmpty": "Nog niemand heeft dit land gekozen. Wees de eerste!"
+    "loginToPredict": "Log in om te voorspellen"
   },
   "Profile": {
     "achievements": "Badges",

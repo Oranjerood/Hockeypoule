@@ -22,6 +22,7 @@ import {
   computePoolLeaderboard,
   hasCompetitionAccess,
 } from "@/lib/pool-helpers";
+import { teamName } from "@/lib/utils";
 
 type Tab = "leaderboard" | "participants" | "matches" | "rules" | "stats" | "chat";
 
@@ -43,6 +44,7 @@ function PoolDetailContent() {
   const updatePointsSettings = useAppStore((s) => s.updatePointsSettings);
   const joinPoolByCode = useAppStore((s) => s.joinPoolByCode);
   const allMatches = useAppStore((s) => s.matches);
+  const teams = useAppStore((s) => s.teams);
   const competitions = useAppStore((s) => s.competitions);
   const competitionAccess = useAppStore((s) => s.competitionAccess);
 
@@ -64,7 +66,8 @@ function PoolDetailContent() {
   const members = getMembersForPool(poolMembers, pool.id);
   const isMember = members.some((m) => m.userId === currentUser.id);
   const myMembership = members.find((m) => m.userId === currentUser.id);
-  const matches = getMatchesForCompetition(allMatches, pool.competitionId);
+  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamId);
+  const countryTeam = pool.countryTeamId ? teams.find((tm) => tm.id === pool.countryTeamId) : undefined;
   const competition = competitions.find((comp) => comp.id === pool.competitionId);
   const settings = getPointsSettings(pool.id);
 
@@ -131,6 +134,11 @@ function PoolDetailContent() {
             {pool.division && (
               <Badge tone={pool.division === "women" ? "primary" : "neutral"} className="text-sm">
                 {pool.division === "women" ? c("women") : c("men")}
+              </Badge>
+            )}
+            {countryTeam && (
+              <Badge tone="neutral" className="text-sm">
+                {countryTeam.flagEmoji} {teamName(countryTeam, locale)}
               </Badge>
             )}
           </div>

@@ -36,6 +36,7 @@ function CompetitionHubContent() {
   const predictions = useAppStore((s) => s.predictions);
   const specialPredictions = useAppStore((s) => s.specialPredictions);
   const matches = useAppStore((s) => s.matches);
+  const teams = useAppStore((s) => s.teams);
   const getPointsSettings = useAppStore((s) => s.getPointsSettings);
   const purchaseCompetitionAccess = useAppStore((s) => s.purchaseCompetitionAccess);
   const createCompany = useAppStore((s) => s.createCompany);
@@ -412,6 +413,7 @@ function CompetitionHubContent() {
             pool, poolMembers, users, predictions, specialPredictions, settings, matches
           );
           const myRow = leaderboard.find((r) => r.userId === currentUser.id);
+          const countryTeam = pool.countryTeamId ? teams.find((tm) => tm.id === pool.countryTeamId) : undefined;
           return (
             <PoolCard
               key={pool.id}
@@ -419,6 +421,7 @@ function CompetitionHubContent() {
               memberCount={memberCount}
               role={role}
               position={myRow?.position}
+              countryTeam={countryTeam}
             />
           );
         })}

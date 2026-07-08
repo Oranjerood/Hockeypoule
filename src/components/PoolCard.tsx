@@ -5,18 +5,20 @@ import { Link } from "@/i18n/navigation";
 import { Users, Crown, Trophy } from "lucide-react";
 import Card from "./ui/Card";
 import Badge from "./ui/Badge";
-import type { Pool } from "@/types";
+import type { Pool, Team } from "@/types";
 
 export default function PoolCard({
   pool,
   memberCount,
   role,
   position,
+  countryTeam,
 }: {
   pool: Pool;
   memberCount: number;
   role: "owner" | "member";
   position?: number;
+  countryTeam?: Team;
 }) {
   const t = useTranslations("Dashboard");
   const c = useTranslations("Common");
@@ -39,6 +41,11 @@ export default function PoolCard({
           )}
           {pool.division && (
             <Badge tone="neutral">{pool.division === "women" ? c("women") : c("men")}</Badge>
+          )}
+          {countryTeam && (
+            <Badge tone="neutral">
+              {countryTeam.flagEmoji} {countryTeam.name}
+            </Badge>
           )}
         </div>
         <div className="mt-auto flex items-center justify-between pt-4 text-sm text-muted">

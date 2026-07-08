@@ -10,9 +10,8 @@ import type {
   CompetitionAccess,
   Division,
   LeaderboardRow,
-  CountryFollow,
 } from "@/types";
-import { buildLeaderboard, DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
+import { buildLeaderboard } from "@/lib/scoring";
 
 export function getMembersForPool(poolMembers: PoolMember[], poolId: string) {
   return poolMembers.filter((m) => m.poolId === poolId);
@@ -35,12 +34,14 @@ export function getPoolsForUser(
 export function getMatchesForCompetition(
   allMatches: Match[],
   competitionId: string,
-  division?: Division
+  division?: Division,
+  teamId?: string
 ) {
   return allMatches.filter(
     (m) =>
       m.competitionId === competitionId &&
-      (division === undefined || m.division === division)
+      (division === undefined || m.division === division) &&
+      (teamId === undefined || m.homeTeamId === teamId || m.awayTeamId === teamId)
   );
 }
 
@@ -75,7 +76,7 @@ export function computePoolLeaderboard(
 ) {
   const memberIds = getMembersForPool(poolMembers, pool.id).map((m) => m.userId);
   const poolUsers = users.filter((u) => memberIds.includes(u.id));
-  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division);
+  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamId);
   const matchIds = new Set(matches.map((m) => m.id));
 
   // Predictions and special predictions are shared across every pool for
@@ -160,32 +161,3 @@ export function computeOverallStandings(
   return rows;
 }
 
-// "King/queen of a country" - rank everyone who has chosen to follow a
-// specific team (country) for a competition by how many points they've
-// scored on just that team's matches. A lightweight, optional prediction
-// game alongside the main tournament leaderboard.
-export function computeCountryLeaderboard(
-  teamId: string,
-  competitionId: string,
-  allMatches: Match[],
-  predictions: Prediction[],
-  users: User[],
-  countryFollows: CountryFollow[]
-): LeaderboardRow[] {
-  const followerIds = countryFollows
-    .filter((f) => f.teamId === teamId && f.competitionId === competitionId)
-    .map((f) => f.userId);
-  const followerUsers = users.filter((u) => followerIds.includes(u.id));
-  const teamMatches = allMatches.filter(
-    (m) => m.competitionId === competitionId && (m.homeTeamId === teamId || m.awayTeamId === teamId)
-  );
-
-  return buildLeaderboard(
-    followerUsers,
-    teamMatches,
-    predictions,
-    [],
-    { championTeamId: undefined, finalistTeamIds: undefined, topscorerName: undefined },
-    DEFAULT_POINTS_SETTINGS
-  );
-}

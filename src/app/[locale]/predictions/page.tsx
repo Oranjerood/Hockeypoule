@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import RequireAuth from "@/components/RequireAuth";
 import MatchesTab from "@/components/pool/MatchesTab";
@@ -8,16 +9,63 @@ import { useAppStore } from "@/lib/store";
 import { hasCompetitionAccess, getMatchesForCompetition } from "@/lib/pool-helpers";
 import { DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
 import { getSport } from "@/data/mock-data";
-import type { Division } from "@/types";
+import type { Competition, Division } from "@/types";
+
+function CompetitionPredictions({ competition }: { competition: Competition }) {
+  const c = useTranslations("Common");
+  const teams = useAppStore((s) => s.teams);
+  const matches = useAppStore((s) => s.matches);
+  const sport = getSport(competition.sportId);
+
+  const hasDivisions = teams.some(
+    (team) => team.competitionId === competition.id && team.division
+  );
+  const divisions: (Division | undefined)[] = hasDivisions ? ["women", "men"] : [undefined];
+  const [active, setActive] = useState<Division | undefined>(divisions[0]);
+
+  const activeMatches = getMatchesForCompetition(matches, competition.id, active);
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 border-b border-border pb-3">
+        <span className="text-2xl">{sport?.emoji}</span>
+        <h2 className="text-lg font-semibold">{competition.name}</h2>
+      </div>
+
+      {hasDivisions && (
+        <div className="mt-4 inline-flex gap-1 rounded-full bg-surface p-1">
+          {divisions.map((division) => (
+            <button
+              key={division}
+              onClick={() => setActive(division)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                active === division
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              {division === "women" ? c("women") : c("men")}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">
+        {activeMatches.length === 0 ? (
+          <p className="text-sm text-muted">—</p>
+        ) : (
+          <MatchesTab matches={activeMatches} settings={DEFAULT_POINTS_SETTINGS} division={active} />
+        )}
+      </div>
+    </div>
+  );
+}
 
 function PredictionsContent() {
   const t = useTranslations("Predictions");
-  const c = useTranslations("Common");
   const currentUser = useAppStore((s) => s.currentUser());
   const competitions = useAppStore((s) => s.competitions);
   const competitionAccess = useAppStore((s) => s.competitionAccess);
-  const teams = useAppStore((s) => s.teams);
-  const matches = useAppStore((s) => s.matches);
 
   if (!currentUser) return null;
 
@@ -41,42 +89,9 @@ function PredictionsContent() {
         </div>
       ) : (
         <div className="mt-8 space-y-12">
-          {myCompetitions.map((competition) => {
-            const sport = getSport(competition.sportId);
-            const hasDivisions = teams.some(
-              (team) => team.competitionId === competition.id && team.division
-            );
-            const divisions: (Division | undefined)[] = hasDivisions ? ["women", "men"] : [undefined];
-
-            return (
-              <div key={competition.id}>
-                <div className="flex items-center gap-2 border-b border-border pb-3">
-                  <span className="text-2xl">{sport?.emoji}</span>
-                  <h2 className="text-lg font-semibold">{competition.name}</h2>
-                </div>
-                <div className="mt-6 space-y-10">
-                  {divisions.map((division) => {
-                    const divisionMatches = getMatchesForCompetition(matches, competition.id, division);
-                    if (divisionMatches.length === 0) return null;
-                    return (
-                      <div key={division ?? "all"}>
-                        {division && (
-                          <h3 className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                            {division === "women" ? c("women") : c("men")}
-                          </h3>
-                        )}
-                        <MatchesTab
-                          matches={divisionMatches}
-                          settings={DEFAULT_POINTS_SETTINGS}
-                          division={division}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {myCompetitions.map((competition) => (
+            <CompetitionPredictions key={competition.id} competition={competition} />
+          ))}
         </div>
       )}
     </div>

@@ -38,7 +38,7 @@ function DivisionSection({ division, label }: { division: Division; label: strin
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {groups.map((group) => {
           const groupTeams = divisionTeams.filter((t) => t.group === group);
           const groupMatches = matches.filter(

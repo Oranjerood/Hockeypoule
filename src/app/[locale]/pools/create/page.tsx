@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import RequireAuth from "@/components/RequireAuth";
@@ -10,11 +10,13 @@ import Button from "@/components/ui/Button";
 import Input, { Label } from "@/components/ui/Input";
 import { useAppStore } from "@/lib/store";
 import { hasCompetitionAccess } from "@/lib/pool-helpers";
+import { teamName } from "@/lib/utils";
 import { Upload } from "lucide-react";
 
 function CreatePoolContent() {
   const t = useTranslations("Pools");
   const tc = useTranslations("Common");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const competitionId = searchParams.get("competitionId") ?? "";
@@ -36,10 +38,17 @@ function CreatePoolContent() {
   const [logoPreview, setLogoPreview] = useState<string | undefined>();
   const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [division, setDivision] = useState<"women" | "men" | "">("");
+  const [scope, setScope] = useState<"full" | "country">("full");
+  const [countryTeamId, setCountryTeamId] = useState("");
 
   const hasDivisions = teams.some(
     (team) => team.competitionId === competitionId && team.division
   );
+  const scopeTeams = teams
+    .filter((team) => team.competitionId === competitionId && (!hasDivisions || team.division === division))
+    .slice()
+    .sort((a, b) => teamName(a, locale).localeCompare(teamName(b, locale)));
+  const canPickCountry = !hasDivisions || !!division;
 
   function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -56,6 +65,7 @@ function CreatePoolContent() {
       visibility,
       division: division || undefined,
       logoUrl: logoPreview,
+      countryTeamId: scope === "country" ? countryTeamId : undefined,
     });
     router.push(`/pools/${pool.id}`);
   }
@@ -157,10 +167,49 @@ function CreatePoolContent() {
                 </p>
               </div>
             )}
+            {canPickCountry && (
+              <div>
+                <Label>{t("predictScope")}</Label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={() => setScope("full")}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      scope === "full" ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <span className="font-semibold">{t("scopeFull")}</span>
+                    <p className="mt-1 text-sm text-muted">{t("scopeFullText")}</p>
+                  </button>
+                  <button
+                    onClick={() => setScope("country")}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      scope === "country" ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <span className="font-semibold">{t("scopeCountry")}</span>
+                    <p className="mt-1 text-sm text-muted">{t("scopeCountryText")}</p>
+                  </button>
+                </div>
+                {scope === "country" && (
+                  <select
+                    value={countryTeamId}
+                    onChange={(e) => setCountryTeamId(e.target.value)}
+                    className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
+                  >
+                    <option value="">{t("scopeCountryPlaceholder")}</option>
+                    {scopeTeams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.flagEmoji} {teamName(team, locale)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
             <Button
               fullWidth
               size="lg"
-              disabled={!name || (hasDivisions && !division)}
+              disabled={!name || (hasDivisions && !division) || (scope === "country" && !countryTeamId)}
               onClick={() => setStep(2)}
             >
               {tc("next")}

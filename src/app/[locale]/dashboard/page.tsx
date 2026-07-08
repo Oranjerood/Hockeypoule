@@ -26,6 +26,7 @@ function DashboardContent() {
   const specialPredictions = useAppStore((s) => s.specialPredictions);
   const getPointsSettings = useAppStore((s) => s.getPointsSettings);
   const matches = useAppStore((s) => s.matches);
+  const teams = useAppStore((s) => s.teams);
   const competitionAccess = useAppStore((s) => s.competitionAccess);
   const locale = useLocale();
 
@@ -61,6 +62,7 @@ function DashboardContent() {
       pool, poolMembers, users, predictions, specialPredictions, settings, matches
     );
     const myRow = leaderboard.find((r) => r.userId === currentUser?.id);
+    const countryTeam = pool.countryTeamId ? teams.find((tm) => tm.id === pool.countryTeamId) : undefined;
     return (
       <PoolCard
         key={pool.id}
@@ -68,6 +70,7 @@ function DashboardContent() {
         memberCount={memberCount}
         role={role}
         position={myRow?.position}
+        countryTeam={countryTeam}
       />
     );
   }

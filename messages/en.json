@@ -38,7 +38,7 @@
     "wkNav": "World Cup"
   },
   "Home": {
-    "heroTitle": "Be the expert of your team",
+    "heroTitle": "Predict smarter than your friends, family or colleagues",
     "heroSubtitle": "Predict the Hockey World Cup, and soon the Dutch Hoofdklasse or your own competition. Create a pool with friends, family or colleagues and compete for first place.",
     "ctaCreate": "Create your own pool",
     "ctaJoin": "I have an invite code",
@@ -68,7 +68,7 @@
     "aboutTitle": "About HockeyPoule",
     "aboutText": "HockeyPoule is an idea from Oranje-Rood Dames 1, born from a love of the game and the wish to let everyone — teammates, family, colleagues and friends — join in predicting big tournaments. Part of the proceeds go straight to the Oranje-Rood Dames 1 team fund.",
     "aboutSponsorTitle": "Sponsor us or support the team",
-    "aboutSponsorText": "Want to sponsor HockeyPoule, advertise, or support the team in another way? Email us — we'd love to hear from you.",
+    "aboutSponsorText": "Want to sponsor Oranje-Rood Dames 1, advertise, or support the team in another way? Email us — we'd love to hear from you.",
     "feedbackText": "Questions or feedback? Email us at hockeypoule@gmail.com",
     "aboutNav": "About us"
   },
@@ -175,7 +175,13 @@
     "needsAccessText": "You don't have access yet to this pool's competition.",
     "predictForWhom": "Who are you predicting for?",
     "predictForWhomNote": "This pool only predicts this tournament — create a second pool if you want to play the other one too.",
-    "goToCompetition": "Go to the competition"
+    "goToCompetition": "Go to the competition",
+    "predictScope": "Predict the whole tournament or just one country?",
+    "scopeFull": "Whole tournament",
+    "scopeFullText": "Predict every match of this tournament.",
+    "scopeCountry": "One country",
+    "scopeCountryText": "Not up for the whole tournament? Pick one country and just predict their matches — less work, and you become king/queen of that country in this pool.",
+    "scopeCountryPlaceholder": "Choose a country..."
   },
   "PoolDetail": {
     "notFoundText": "Pool not found.",
@@ -263,15 +269,7 @@
     "statusFinished": "Finished",
     "statusLive": "Live",
     "statusUpcoming": "Upcoming",
-    "kingQueenTitle": "Become king/queen of {team}",
-    "kingQueenText": "Not up for predicting the whole tournament? Just predict this country's matches above and become king/queen of {team}.",
-    "kingQueenLoginCta": "Log in to join",
-    "kingQueenFollowButton": "Become king/queen of this country",
-    "kingQueenFollowing": "You're a candidate",
-    "kingQueenUnfollow": "Stop following",
-    "kingQueenSwitchNote": "You're currently following a different country for this tournament — choosing this one replaces that pick.",
-    "kingQueenLeaderboard": "King/queen leaderboard",
-    "kingQueenEmpty": "No one has picked this country yet. Be the first!"
+    "loginToPredict": "Log in to predict"
   },
   "Profile": {
     "achievements": "Badges",
