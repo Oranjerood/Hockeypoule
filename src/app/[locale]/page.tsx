@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Trophy, Target, TrendingUp, BarChart3, Zap, Sliders, Globe2, Building2, ArrowRight } from "lucide-react";
+import { Trophy, Target, TrendingUp, BarChart3, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -28,7 +28,16 @@ export default function HomePage() {
 
   const featured = COMPETITIONS.find((comp) => comp.id === "comp-wk-hockey-2026")!;
   const officialCompetitions = COMPETITIONS.filter((comp) => comp.isOfficial);
-  const featuredTeams = TEAMS.filter((team) => team.competitionId === featured.id).slice(0, 8);
+
+  // One flag chip per country (women's + men's team collapse into one chip
+  // that links to that country's combined team page).
+  const wkTeams = TEAMS.filter((team) => team.competitionId === featured.id);
+  const seenCountries = new Set<string>();
+  const featuredTeams = wkTeams.filter((team) => {
+    if (seenCountries.has(team.country)) return false;
+    seenCountries.add(team.country);
+    return true;
+  }).slice(0, 10);
 
   return (
     <div>
@@ -46,23 +55,32 @@ export default function HomePage() {
           <p className="mt-4 max-w-xl text-base text-white/70 sm:text-lg">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button href={`/competitions/${featured.id}`} size="lg">
-              {t("ctaNational")}
+              <Trophy size={17} /> {t("ctaNational")}
             </Button>
             <Button href="/pools/join" variant="outline" size="lg" className="border-white/20 text-white">
-              {t("ctaJoin")}
+              <KeyRound size={16} /> {t("ctaJoin")}
+            </Button>
+            <Button
+              href={{ pathname: "/pools/create", query: { competitionId: featured.id } }}
+              variant="ghost"
+              size="lg"
+              className="text-white/80 hover:text-white"
+            >
+              <PlusCircle size={16} /> {t("ctaCreate")}
             </Button>
           </div>
 
           <div className="mt-10 flex flex-wrap gap-3">
             {featuredTeams.map((team) => (
-              <span
+              <Link
                 key={team.id}
-                className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-sm text-white/80"
+                href={`/teams/${team.id}`}
+                className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <span className="text-base">{team.flagEmoji}</span> {team.country}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

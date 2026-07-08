@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Trophy, Building2, Ticket, Heart } from "lucide-react";
+import { Trophy, Gift, Ticket, Heart } from "lucide-react";
 import RequireAuth from "@/components/RequireAuth";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -144,25 +144,29 @@ function CompetitionHubContent() {
 
         <Card className="mt-4 p-6">
           <div className="flex items-center gap-2">
-            <Building2 size={18} className="text-primary" />
+            <Gift size={18} className="text-primary" />
             <h2 className="font-semibold">{t("companyOption")}</h2>
           </div>
           <p className="mt-1 text-sm text-muted">{t("companyOptionText")}</p>
 
           {!showCompanyForm && !companyResult && (
             <Button variant="outline" className="mt-4" onClick={() => setShowCompanyForm(true)}>
-              {t("companyOption")}
+              <Gift size={15} /> {t("companyOption")}
             </Button>
           )}
 
           {showCompanyForm && !companyResult && (
             <div className="mt-4 space-y-3">
               <div>
-                <Label>Bedrijfsnaam</Label>
-                <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                <Label>{t("companyGroupName")}</Label>
+                <Input
+                  placeholder={t("companyGroupNamePlaceholder")}
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
               </div>
               <div>
-                <Label>Aantal medewerkers</Label>
+                <Label>{t("companySeatsLabel")}</Label>
                 <input
                   type="number"
                   min={1}
@@ -181,7 +185,7 @@ function CompetitionHubContent() {
                 amountLabel={formatCurrency(competition.entryFeeCents * companySeats, locale)}
                 onPaid={() => {
                   const company = createCompany({
-                    name: companyName || "Mijn bedrijf",
+                    name: companyName || "Mijn groep",
                     competitionId,
                     seats: companySeats,
                   });
@@ -193,10 +197,8 @@ function CompetitionHubContent() {
 
           {companyResult && (
             <div className="mt-4 rounded-xl bg-success/10 p-4 text-sm">
-              <p className="font-medium text-success">Bedrijfspoule aangemaakt 🎉</p>
-              <p className="mt-1 text-muted">
-                Deel deze code met je collega&apos;s zodat zij gratis kunnen meedoen:
-              </p>
+              <p className="font-medium text-success">{t("companyResultTitle")}</p>
+              <p className="mt-1 text-muted">{t("companyResultText")}</p>
               <p className="mt-2 font-mono text-base font-bold">{companyResult.inviteCode}</p>
             </div>
           )}

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Podium",
+  title: "HockeyPoule",
   description: "Eén platform om elk sporttoernooi te voorspellen — voetbal, hockey, of je eigen competitie.",
   manifest: "/manifest.json",
   icons: {

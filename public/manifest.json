@@ -1,6 +1,6 @@
 {
-  "name": "Podium",
-  "short_name": "Podium",
+  "name": "HockeyPoule",
+  "short_name": "HockeyPoule",
   "description": "E\u00e9n platform om elk sporttoernooi te voorspellen \u2014 voetbal, hockey, of je eigen competitie.",
   "start_url": "/nl",
   "scope": "/",

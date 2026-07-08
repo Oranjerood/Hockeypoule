@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import type { ComponentProps } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -25,7 +26,7 @@ const sizeClasses: Record<Size, string> = {
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
-  href?: string;
+  href?: ComponentProps<typeof Link>["href"];
   fullWidth?: boolean;
   children: ReactNode;
 }
