@@ -140,8 +140,7 @@ export interface SpecialPrediction {
   competitionId: string;
   championTeamId?: string;
   finalistTeamIds?: string[]; // exactly 2
-  topscorerName?: string;
-  surpriseTeamId?: string;
+  topscorerNames?: string[]; // up to 3 picks, like Scorito - any correct pick counts
 }
 
 export interface PointsSettings {
@@ -152,7 +151,6 @@ export interface PointsSettings {
   champion: number;
   finalist: number;
   topscorer: number;
-  surpriseTeam: number;
 }
 
 export interface LeaderboardRow {

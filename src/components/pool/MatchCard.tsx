@@ -51,7 +51,14 @@ export default function MatchCard({
     <div className="rounded-2xl border border-border p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
         <span>{formatDateLong(match.date, locale)} · {match.time}</span>
-        <Badge tone={statusTone}>{statusLabel}</Badge>
+        <div className="flex items-center gap-1.5">
+          {match.division && (
+            <Badge tone={match.division === "women" ? "primary" : "neutral"}>
+              {match.division === "women" ? "Vrouwen" : "Mannen"}
+            </Badge>
+          )}
+          <Badge tone={statusTone}>{statusLabel}</Badge>
+        </div>
       </div>
       <div className="mt-1 flex items-center gap-1 text-xs text-muted">
         <MapPin size={12} /> {match.location} {match.group ? `· ${match.group}` : ""}

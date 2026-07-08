@@ -21,8 +21,7 @@ export default function SpecialPredictionsPanel({
   onSave: (data: {
     championTeamId?: string;
     finalistTeamIds?: string[];
-    topscorerName?: string;
-    surpriseTeamId?: string;
+    topscorerNames?: string[];
   }) => void;
 }) {
   const t = useTranslations("PoolDetail");
@@ -30,13 +29,17 @@ export default function SpecialPredictionsPanel({
   const [champion, setChampion] = useState(prediction?.championTeamId ?? "");
   const [finalistA, setFinalistA] = useState(prediction?.finalistTeamIds?.[0] ?? "");
   const [finalistB, setFinalistB] = useState(prediction?.finalistTeamIds?.[1] ?? "");
-  const [topscorer, setTopscorer] = useState(prediction?.topscorerName ?? "");
+  const [topscorer1, setTopscorer1] = useState(prediction?.topscorerNames?.[0] ?? "");
+  const [topscorer2, setTopscorer2] = useState(prediction?.topscorerNames?.[1] ?? "");
+  const [topscorer3, setTopscorer3] = useState(prediction?.topscorerNames?.[2] ?? "");
 
   useEffect(() => {
     setChampion(prediction?.championTeamId ?? "");
     setFinalistA(prediction?.finalistTeamIds?.[0] ?? "");
     setFinalistB(prediction?.finalistTeamIds?.[1] ?? "");
-    setTopscorer(prediction?.topscorerName ?? "");
+    setTopscorer1(prediction?.topscorerNames?.[0] ?? "");
+    setTopscorer2(prediction?.topscorerNames?.[1] ?? "");
+    setTopscorer3(prediction?.topscorerNames?.[2] ?? "");
   }, [prediction]);
 
   return (
@@ -100,15 +103,31 @@ export default function SpecialPredictionsPanel({
           </div>
         </div>
 
-        <div>
-          <Label>{t("topscorerPrediction")}</Label>
-          <input
-            disabled={locked}
-            value={topscorer}
-            onChange={(e) => setTopscorer(e.target.value)}
-            placeholder="Naam speler"
-            className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
-          />
+        <div className="sm:col-span-2">
+          <Label>{t("topscorerPrediction")} (top 3, net als bij Scorito — één goed is genoeg)</Label>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <input
+              disabled={locked}
+              value={topscorer1}
+              onChange={(e) => setTopscorer1(e.target.value)}
+              placeholder="1e keuze"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+            />
+            <input
+              disabled={locked}
+              value={topscorer2}
+              onChange={(e) => setTopscorer2(e.target.value)}
+              placeholder="2e keuze"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+            />
+            <input
+              disabled={locked}
+              value={topscorer3}
+              onChange={(e) => setTopscorer3(e.target.value)}
+              placeholder="3e keuze"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+            />
+          </div>
         </div>
 
       </div>
@@ -120,7 +139,7 @@ export default function SpecialPredictionsPanel({
             onSave({
               championTeamId: champion || undefined,
               finalistTeamIds: finalistA && finalistB ? [finalistA, finalistB] : undefined,
-              topscorerName: topscorer || undefined,
+              topscorerNames: [topscorer1, topscorer2, topscorer3].filter(Boolean),
             })
           }
         >

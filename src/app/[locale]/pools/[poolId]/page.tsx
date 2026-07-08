@@ -13,6 +13,7 @@ import MatchesTab from "@/components/pool/MatchesTab";
 import RulesTab from "@/components/pool/RulesTab";
 import StatsTab from "@/components/pool/StatsTab";
 import { useAppStore } from "@/lib/store";
+import PoolSwitcher from "@/components/PoolSwitcher";
 import {
   getMembersForPool,
   getMatchesForCompetition,
@@ -119,14 +120,25 @@ function PoolDetailContent() {
           <Trophy size={24} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{pool.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">{pool.name}</h1>
+            {pool.division && (
+              <Badge tone={pool.division === "women" ? "primary" : "neutral"} className="text-sm">
+                {pool.division === "women" ? "Vrouwen" : "Mannen"}
+              </Badge>
+            )}
+          </div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            {pool.isNational && <Badge tone="primary">🇳🇱 Landelijk</Badge>}
+            {pool.isNational && <Badge tone="primary">Officiële poule</Badge>}
             {pool.isCompany && <Badge tone="primary">Bedrijfspoule</Badge>}
             <Badge tone="neutral">{pool.visibility === "public" ? "Publiek" : "Privé"}</Badge>
             {myMembership?.role === "owner" && <Badge tone="primary">Eigenaar</Badge>}
           </div>
         </div>
+      </div>
+
+      <div className="mt-4">
+        <PoolSwitcher currentPoolId={pool.id} />
       </div>
 
       <div className="mt-8 flex gap-1 overflow-x-auto rounded-full bg-surface p-1 sm:inline-flex">

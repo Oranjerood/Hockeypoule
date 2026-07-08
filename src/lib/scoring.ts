@@ -20,7 +20,6 @@ export const DEFAULT_POINTS_SETTINGS: PointsSettings = {
   champion: 20,
   finalist: 10,
   topscorer: 15,
-  surpriseTeam: 10,
 };
 
 /**
@@ -71,7 +70,6 @@ interface SpecialResult {
   championTeamId?: string;
   finalistTeamIds?: string[];
   topscorerName?: string;
-  surpriseTeamId?: string;
 }
 
 export function scoreSpecialPrediction(
@@ -97,20 +95,13 @@ export function scoreSpecialPrediction(
     points += correctFinalists.length * settings.finalist;
   }
 
-  if (
-    result.topscorerName &&
-    prediction.topscorerName &&
-    prediction.topscorerName.trim().toLowerCase() ===
-      result.topscorerName.trim().toLowerCase()
-  ) {
-    points += settings.topscorer;
-  }
-
-  if (
-    result.surpriseTeamId &&
-    prediction.surpriseTeamId === result.surpriseTeamId
-  ) {
-    points += settings.surpriseTeam;
+  if (result.topscorerName && prediction.topscorerNames?.length) {
+    const guessedRight = prediction.topscorerNames.some(
+      (name) => name.trim().toLowerCase() === result.topscorerName!.trim().toLowerCase()
+    );
+    if (guessedRight) {
+      points += settings.topscorer;
+    }
   }
 
   return points;

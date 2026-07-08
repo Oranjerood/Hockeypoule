@@ -1,20 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import RequireAuth from "@/components/RequireAuth";
 import PoolCard from "@/components/PoolCard";
 import Button from "@/components/ui/Button";
 import { useAppStore } from "@/lib/store";
 import { getPoolsForUser, getMembersForPool, computePoolLeaderboard } from "@/lib/pool-helpers";
-import { PlusCircle, UsersRound, ArrowRightLeft } from "lucide-react";
+import { PlusCircle, UsersRound } from "lucide-react";
+import PoolSwitcher from "@/components/PoolSwitcher";
 
 const WK_HOCKEY_ID = "comp-wk-hockey-2026";
 
 function DashboardContent() {
   const t = useTranslations("Dashboard");
-  const router = useRouter();
   const currentUser = useAppStore((s) => s.currentUser());
   const pools = useAppStore((s) => s.pools);
   const poolMembers = useAppStore((s) => s.poolMembers);
@@ -23,8 +21,6 @@ function DashboardContent() {
   const specialPredictions = useAppStore((s) => s.specialPredictions);
   const getPointsSettings = useAppStore((s) => s.getPointsSettings);
   const matches = useAppStore((s) => s.matches);
-
-  const [switchPoolId, setSwitchPoolId] = useState("");
 
   if (!currentUser) return null;
 
@@ -99,38 +95,9 @@ function DashboardContent() {
             )}
           </div>
 
-          {myPools.length > 1 && (
-            <div className="mt-10 rounded-2xl border border-border p-5">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <ArrowRightLeft size={16} className="text-primary" />
-                Snel wisselen tussen poules
-              </div>
-              <p className="mt-1 text-sm text-muted">
-                Bekijk hoe je ervoor staat in een van je andere poules.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <select
-                  value={switchPoolId}
-                  onChange={(e) => setSwitchPoolId(e.target.value)}
-                  className="rounded-xl border border-border bg-surface px-3 py-2 text-sm"
-                >
-                  <option value="">Kies een poule...</option>
-                  {myPools.map(({ pool }) => (
-                    <option key={pool.id} value={pool.id}>
-                      {pool.name}
-                    </option>
-                  ))}
-                </select>
-                <Button
-                  size="sm"
-                  disabled={!switchPoolId}
-                  onClick={() => switchPoolId && router.push(`/pools/${switchPoolId}`)}
-                >
-                  Bekijk poule
-                </Button>
-              </div>
-            </div>
-          )}
+          <div className="mt-10">
+            <PoolSwitcher />
+          </div>
         </>
       )}
     </div>
