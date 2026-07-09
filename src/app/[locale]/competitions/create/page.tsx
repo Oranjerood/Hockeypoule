@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import RequireAuth from "@/components/RequireAuth";
@@ -9,12 +9,12 @@ import Button from "@/components/ui/Button";
 import Input, { Label } from "@/components/ui/Input";
 import { useAppStore } from "@/lib/store";
 import { SPORTS } from "@/data/mock-data";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { generateRoundRobinMatchups, defaultGroupAssignment, pairKey } from "@/lib/round-robin";
+import { Plus, Trash2, Upload, Info } from "lucide-react";
 
 interface TeamDraft {
   name: string;
-  country: string;
-  flagEmoji: string;
+  group?: string;
 }
 
 function CreateCompetitionContent() {
@@ -31,16 +31,15 @@ function CreateCompetitionContent() {
   const [customSport, setCustomSport] = useState("");
   const [season, setSeason] = useState(String(new Date().getFullYear()));
 
-  // Step 2: teams
-  const [teams, setTeams] = useState<TeamDraft[]>([
-    { name: "", country: "", flagEmoji: "🏳️" },
-    { name: "", country: "", flagEmoji: "🏳️" },
-  ]);
+  // Step 2: teams (name only - these are club/company/friend teams, not
+  // national teams, so there's no country/flag to fill in)
+  const [teams, setTeams] = useState<TeamDraft[]>([{ name: "" }, { name: "" }]);
   const [csvError, setCsvError] = useState("");
 
-  // Step 3: format
+  // Step 3: format + pool assignment + excluded matchups
   const [poolCount, setPoolCount] = useState(1);
   const [roundRobinType, setRoundRobinType] = useState<"single" | "double">("single");
+  const [excludedKeys, setExcludedKeys] = useState<Set<string>>(new Set());
 
   // Step 4: planning (optional)
   const [fillPlanning, setFillPlanning] = useState(false);
@@ -48,12 +47,16 @@ function CreateCompetitionContent() {
   const [startTime, setStartTime] = useState("19:00");
   const [location, setLocation] = useState("");
 
-  function updateTeam(index: number, field: keyof TeamDraft, value: string) {
-    setTeams((prev) => prev.map((team, i) => (i === index ? { ...team, [field]: value } : team)));
+  function updateTeamName(index: number, value: string) {
+    setTeams((prev) => prev.map((team, i) => (i === index ? { ...team, name: value } : team)));
+  }
+
+  function updateTeamGroup(index: number, value: string) {
+    setTeams((prev) => prev.map((team, i) => (i === index ? { ...team, group: value || undefined } : team)));
   }
 
   function addTeamRow() {
-    setTeams((prev) => [...prev, { name: "", country: "", flagEmoji: "🏳️" }]);
+    setTeams((prev) => [...prev, { name: "" }]);
   }
 
   function removeTeamRow(index: number) {
@@ -67,38 +70,57 @@ function CreateCompetitionContent() {
     reader.onload = () => {
       try {
         const text = String(reader.result ?? "");
-        const rows = text
+        const parsed: TeamDraft[] = text
           .split(/\r?\n/)
           .map((line) => line.trim())
           .filter(Boolean)
-          .map((line) => line.split(","));
-        const parsed: TeamDraft[] = rows.map(([teamName, country]) => ({
-          name: (teamName ?? "").trim(),
-          country: (country ?? "").trim() || "—",
-          flagEmoji: "🏳️",
-        }));
+          .map((line) => ({ name: line.split(",")[0].trim() }))
+          .filter((team) => team.name);
         if (parsed.length === 0) throw new Error("empty");
         setTeams(parsed);
         setCsvError("");
       } catch {
-        setCsvError("Kon het bestand niet lezen. Gebruik het formaat: Teamnaam,Land per regel.");
+        setCsvError(t("csvError"));
       }
     };
     reader.readAsText(file);
   }
 
   const validTeamCount = teams.filter((team) => team.name.trim()).length;
+  const validTeams = teams.filter((team) => team.name.trim());
+
+  // Apply (or re-apply) a sensible default pool assignment whenever the
+  // organizer changes the pool count - they can still override any team
+  // individually afterwards.
+  function applyDefaultGroups(nextPoolCount: number) {
+    setPoolCount(nextPoolCount);
+    const defaults = defaultGroupAssignment(teams.length, nextPoolCount);
+    setTeams((prev) => prev.map((team, i) => ({ ...team, group: defaults[i] })));
+  }
+
+  const matchups = useMemo(
+    () => generateRoundRobinMatchups(validTeams, roundRobinType),
+    [validTeams, roundRobinType]
+  );
+
+  function toggleMatchup(key: string) {
+    setExcludedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   function handleSubmit() {
-    const validTeams = teams.filter((team) => team.name.trim());
     const competition = createCustomCompetition({
       name,
       sportId,
       customSportName: sportId === "custom" ? customSport : undefined,
       season,
       teams: validTeams,
-      poolCount,
       roundRobinType,
+      excludedPairKeys: Array.from(excludedKeys),
       startDate: fillPlanning && startDate ? startDate : undefined,
       startTime: fillPlanning && startTime ? startTime : undefined,
       location: fillPlanning ? location : undefined,
@@ -120,11 +142,11 @@ function CreateCompetitionContent() {
       <Card className="mt-6 space-y-5 p-6">
         {step === 1 && (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Basisgegevens</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{t("stepBasics")}</h2>
             <div>
-              <Label>Naam van de competitie</Label>
+              <Label>{t("competitionName")}</Label>
               <Input
-                placeholder="Bijv. Vriendengroep Padel Competitie"
+                placeholder={t("competitionNamePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -132,7 +154,7 @@ function CreateCompetitionContent() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label>Sport</Label>
+                <Label>{t("sport")}</Label>
                 <select
                   value={sportId}
                   onChange={(e) => setSportId(e.target.value)}
@@ -143,19 +165,19 @@ function CreateCompetitionContent() {
                       {sport.emoji} {sport.name}
                     </option>
                   ))}
-                  <option value="custom">Anders, namelijk...</option>
+                  <option value="custom">{t("sportOther")}</option>
                 </select>
                 {sportId === "custom" && (
                   <Input
                     className="mt-2"
-                    placeholder="Naam van de sport"
+                    placeholder={t("sportOtherPlaceholder")}
                     value={customSport}
                     onChange={(e) => setCustomSport(e.target.value)}
                   />
                 )}
               </div>
               <div>
-                <Label>Seizoen</Label>
+                <Label>{t("season")}</Label>
                 <Input value={season} onChange={(e) => setSeason(e.target.value)} />
               </div>
             </div>
@@ -168,36 +190,30 @@ function CreateCompetitionContent() {
 
         {step === 2 && (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Teams</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{t("stepTeams")}</h2>
             <div>
               <div className="flex items-center justify-between">
-                <Label className="mb-0">Teams</Label>
+                <Label className="mb-0">{t("stepTeams")}</Label>
                 <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                  <Upload size={13} /> Upload CSV
+                  <Upload size={13} /> {t("uploadCsv")}
                   <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvUpload} />
                 </label>
               </div>
-              <p className="mt-1 text-xs text-muted">Formaat per regel: Teamnaam,Land — of voer teams hieronder handmatig in.</p>
+              <p className="mt-1 text-xs text-muted">{t("csvFormatNote")}</p>
               {csvError && <p className="mt-1 text-xs text-danger">{csvError}</p>}
 
               <div className="mt-3 space-y-2">
                 {teams.map((team, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
-                      placeholder="Teamnaam"
+                      placeholder={t("teamNamePlaceholder")}
                       value={team.name}
-                      onChange={(e) => updateTeam(index, "name", e.target.value)}
-                    />
-                    <Input
-                      placeholder="Land (optioneel)"
-                      value={team.country}
-                      onChange={(e) => updateTeam(index, "country", e.target.value)}
-                      className="w-36"
+                      onChange={(e) => updateTeamName(index, e.target.value)}
                     />
                     <button
                       onClick={() => removeTeamRow(index)}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-danger hover:bg-danger/10"
-                      aria-label="Verwijder"
+                      aria-label={t("removeTeam")}
                     >
                       <Trash2 size={15} />
                     </button>
@@ -205,7 +221,7 @@ function CreateCompetitionContent() {
                 ))}
               </div>
               <Button variant="outline" size="sm" className="mt-3" onClick={addTeamRow}>
-                <Plus size={14} /> Team toevoegen
+                <Plus size={14} /> {t("addTeam")}
               </Button>
             </div>
 
@@ -220,9 +236,9 @@ function CreateCompetitionContent() {
 
         {step === 3 && (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Indeling</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{t("stepFormat")}</h2>
             <div>
-              <Label>Speelt iedereen elkaar één keer of twee keer (thuis en uit)?</Label>
+              <Label>{t("roundRobinQuestion")}</Label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   onClick={() => setRoundRobinType("single")}
@@ -230,8 +246,8 @@ function CreateCompetitionContent() {
                     roundRobinType === "single" ? "border-primary bg-primary/5" : "border-border"
                   }`}
                 >
-                  <span className="font-semibold">Eén keer</span>
-                  <p className="mt-1 text-sm text-muted">Elk team speelt één keer tegen elk ander team.</p>
+                  <span className="font-semibold">{t("roundRobinOnce")}</span>
+                  <p className="mt-1 text-sm text-muted">{t("roundRobinOnceText")}</p>
                 </button>
                 <button
                   onClick={() => setRoundRobinType("double")}
@@ -239,28 +255,83 @@ function CreateCompetitionContent() {
                     roundRobinType === "double" ? "border-primary bg-primary/5" : "border-border"
                   }`}
                 >
-                  <span className="font-semibold">Twee keer (thuis/uit)</span>
-                  <p className="mt-1 text-sm text-muted">Elk team speelt twee keer tegen elk ander team.</p>
+                  <span className="font-semibold">{t("roundRobinTwice")}</span>
+                  <p className="mt-1 text-sm text-muted">{t("roundRobinTwiceText")}</p>
                 </button>
               </div>
             </div>
 
             <div>
-              <Label>Hoeveel poules/groepen zijn er?</Label>
+              <Label>{t("poolCountQuestion")}</Label>
               <input
                 type="number"
                 min={1}
                 max={8}
                 value={poolCount}
-                onChange={(e) => setPoolCount(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => applyDefaultGroups(Math.max(1, Number(e.target.value)))}
                 className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
               />
-              <p className="mt-1 text-xs text-muted">
-                {poolCount > 1
-                  ? `De ${validTeamCount} teams worden automatisch verdeeld over ${poolCount} poules.`
-                  : "Alle teams spelen in één groep tegen elkaar."}
-              </p>
             </div>
+
+            {poolCount > 1 && (
+              <div>
+                <Label>{t("manualGroupAssignment")}</Label>
+                <p className="mb-2 text-xs text-muted">{t("manualGroupAssignmentText")}</p>
+                <div className="space-y-2">
+                  {validTeams.map((team, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="flex-1 truncate text-sm">{team.name}</span>
+                      <select
+                        value={team.group ?? ""}
+                        onChange={(e) => updateTeamGroup(teams.indexOf(team), e.target.value)}
+                        className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm"
+                      >
+                        {Array.from({ length: poolCount }, (_, i) => `Poule ${"ABCDEFGH"[i]}`).map((g) => (
+                          <option key={g} value={g}>
+                            {g}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {matchups.length > 0 && (
+              <div>
+                <Label>{t("matchupsPreview")}</Label>
+                <p className="mb-2 flex items-start gap-1.5 text-xs text-muted">
+                  <Info size={13} className="mt-0.5 shrink-0" />
+                  {t("matchupsPreviewText")}
+                </p>
+                <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-border p-2">
+                  {matchups.map((m, i) => {
+                    const key = pairKey(m.teamAName, m.teamBName);
+                    const excluded = excludedKeys.has(key);
+                    return (
+                      <label
+                        key={`${key}-${m.leg}-${i}`}
+                        className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm ${
+                          excluded ? "opacity-40" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!excluded}
+                          onChange={() => toggleMatchup(key)}
+                        />
+                        <span className="truncate">
+                          {m.teamAName} — {m.teamBName}
+                          {m.group ? ` (${m.group})` : ""}
+                          {m.leg === 2 ? " ↩" : ""}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(2)}>{tc("back")}</Button>
@@ -271,7 +342,7 @@ function CreateCompetitionContent() {
 
         {step === 4 && (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Planning (optioneel)</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{t("stepPlanning")}</h2>
             <label className="flex items-start gap-3 rounded-2xl border border-border p-4">
               <input
                 type="checkbox"
@@ -280,18 +351,15 @@ function CreateCompetitionContent() {
                 className="mt-1"
               />
               <span>
-                <span className="block font-semibold">Nu al een datum, tijd en locatie invullen</span>
-                <span className="block text-sm text-muted">
-                  Geldt dan als standaard voor alle wedstrijden. Laat dit uit om het later per wedstrijd in
-                  te vullen via het beheerpaneel.
-                </span>
+                <span className="block font-semibold">{t("planningToggle")}</span>
+                <span className="block text-sm text-muted">{t("planningToggleText")}</span>
               </span>
             </label>
 
             {fillPlanning && (
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label>Startdatum</Label>
+                  <Label>{t("startDate")}</Label>
                   <input
                     type="date"
                     value={startDate}
@@ -300,7 +368,7 @@ function CreateCompetitionContent() {
                   />
                 </div>
                 <div>
-                  <Label>Tijd</Label>
+                  <Label>{t("startTime")}</Label>
                   <input
                     type="time"
                     value={startTime}
@@ -309,15 +377,17 @@ function CreateCompetitionContent() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <Label>Locatie</Label>
+                  <Label>{t("location")}</Label>
                   <Input
-                    placeholder="Bijv. Sportpark De Vlieger"
+                    placeholder={t("locationPlaceholder")}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
                 </div>
               </div>
             )}
+
+            <p className="rounded-xl bg-primary/10 px-4 py-3 text-sm text-primary">{t("customEntryFeeNote")}</p>
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(3)}>{tc("back")}</Button>

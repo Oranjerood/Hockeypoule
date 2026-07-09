@@ -24,6 +24,7 @@ export default function MatchesTab({
   const specialPredictions = useAppStore((s) => s.specialPredictions);
   const setMatchPrediction = useAppStore((s) => s.setMatchPrediction);
   const setSpecialPrediction = useAppStore((s) => s.setSpecialPrediction);
+  const allPlayers = useAppStore((s) => s.players);
 
   const rounds = useMemo(() => Array.from(new Set(matches.map((m) => m.round))), [matches]);
   const groups = useMemo(
@@ -53,11 +54,15 @@ export default function MatchesTab({
       sp.userId === currentUser?.id
   );
   const competitionTeams = allTeams.filter((team) => team.competitionId === competitionId);
+  const relevantTeams = division ? competitionTeams.filter((team) => team.division === division) : competitionTeams;
+  const relevantTeamIds = new Set(relevantTeams.map((team) => team.id));
+  const relevantPlayers = allPlayers.filter((player) => relevantTeamIds.has(player.teamId));
 
   return (
     <div className="space-y-6">
       <SpecialPredictionsPanel
         teams={competitionTeams}
+        players={relevantPlayers}
         prediction={mySpecial}
         locked={specialLocked || !currentUser}
         onSave={(data) => setSpecialPrediction(competitionId, division, data)}
@@ -104,6 +109,7 @@ export default function MatchesTab({
               teams={competitionTeams}
               prediction={prediction}
               settings={settings}
+              allMatches={matches}
               onSave={(homeScore, awayScore) =>
                 setMatchPrediction(match.id, homeScore, awayScore)
               }

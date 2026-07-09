@@ -19,6 +19,7 @@ import type {
   Sport,
   Division,
   ChatMessage,
+  Player,
 } from "@/types";
 import {
   USERS,
@@ -34,9 +35,11 @@ import {
   SPONSORS,
   PRIZES,
   SPORTS,
+  PLAYERS,
 } from "@/data/mock-data";
 import { DEFAULT_POINTS_SETTINGS } from "@/lib/scoring";
 import { generateInviteCode, randomAvatarColor } from "@/lib/utils";
+import { generateRoundRobinMatchups, pairKey } from "@/lib/round-robin";
 
 interface CreatePoolInput {
   name: string;
@@ -60,9 +63,9 @@ interface CustomCompetitionInput {
   sportId: string;
   customSportName?: string;
   season: string;
-  teams: { name: string; country?: string; flagEmoji?: string }[];
-  poolCount?: number;
+  teams: { name: string; group?: string }[];
   roundRobinType?: "single" | "double";
+  excludedPairKeys?: string[];
   startDate?: string;
   startTime?: string;
   location?: string;
@@ -86,6 +89,7 @@ interface AppState {
   sponsors: Sponsor[];
   prizes: Prize[];
   chatMessages: ChatMessage[];
+  players: Player[];
 
   currentUser: () => User | null;
 
@@ -134,6 +138,7 @@ interface AppState {
   addSponsor: (name: string) => void;
   addPrize: (title: string, description: string) => void;
   sendChatMessage: (poolId: string, text: string) => void;
+  setSquad: (teamId: string, playerNames: string[]) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -156,6 +161,7 @@ export const useAppStore = create<AppState>()(
       sponsors: SPONSORS,
       prizes: PRIZES,
       chatMessages: [],
+      players: PLAYERS,
 
       currentUser: () => {
         const { currentUserId, users } = get();
@@ -379,64 +385,62 @@ export const useAppStore = create<AppState>()(
           groups: [],
           isActive: true,
           isOfficial: false,
-          entryFeeCents: 0,
+          // Same one-time entry fee model as the official competitions: the
+          // creator (and everyone who later joins) pays once for unlimited
+          // pools within this competition.
+          entryFeeCents: 400,
           createdBy: currentUserId ?? undefined,
         };
-        const poolCount = Math.max(1, input.poolCount ?? 1);
-        const poolLetters = "ABCDEFGH";
+
+        // Teams are plain club/company/friend-group teams here, not national
+        // teams, so there's no real country/flag - just a name and whichever
+        // pool/group the organizer assigned it to (the actual real-world
+        // draw, not something we invent).
         const newTeams: Team[] = input.teams.map((team, i) => ({
           id: `team-custom-${Date.now()}-${i}`,
           competitionId,
           name: team.name,
-          country: team.country ?? "—",
-          flagEmoji: team.flagEmoji ?? "🏳️",
-          group: poolCount > 1 ? `Poule ${poolLetters[i % poolCount]}` : undefined,
+          country: team.name,
+          flagEmoji: "🏳️",
+          group: team.group,
         }));
+        const nameToId = new Map(newTeams.map((team) => [team.name, team.id]));
 
-        // Generate a round-robin schedule per pool (everyone plays everyone
-        // once, or twice home-and-away if requested).
-        const double = input.roundRobinType === "double";
         const startDate = input.startDate || competition.startDate;
         const startTime = input.startTime || "12:00";
-        const groupNames = poolCount > 1 ? poolLetters.slice(0, poolCount).split("").map((l) => `Poule ${l}`) : [undefined];
+        const excludedPairs = new Set(input.excludedPairKeys ?? []);
+
+        // Generate the round-robin schedule per pool (everyone plays everyone
+        // once, or twice home-and-away if requested), then drop any specific
+        // matchups the organizer excluded (not every team has to play every
+        // other team).
+        const matchups = generateRoundRobinMatchups(
+          newTeams.map((team) => ({ name: team.name, group: team.group })),
+          input.roundRobinType ?? "single"
+        );
+
         const newMatches: Match[] = [];
         let matchCounter = 0;
-        for (const groupName of groupNames) {
-          const poolTeams = groupName
-            ? newTeams.filter((t) => t.group === groupName)
-            : newTeams;
-          for (let i = 0; i < poolTeams.length; i++) {
-            for (let j = i + 1; j < poolTeams.length; j++) {
-              matchCounter += 1;
-              newMatches.push({
-                id: `match-custom-${Date.now()}-${matchCounter}`,
-                competitionId,
-                homeTeamId: poolTeams[i].id,
-                awayTeamId: poolTeams[j].id,
-                date: startDate,
-                time: startTime,
-                location: input.location ?? "",
-                group: groupName,
-                round: groupName ? `Groepsfase - ${groupName}` : "Groepsfase",
-                status: "upcoming",
-              });
-              if (double) {
-                matchCounter += 1;
-                newMatches.push({
-                  id: `match-custom-${Date.now()}-${matchCounter}`,
-                  competitionId,
-                  homeTeamId: poolTeams[j].id,
-                  awayTeamId: poolTeams[i].id,
-                  date: startDate,
-                  time: startTime,
-                  location: input.location ?? "",
-                  group: groupName,
-                  round: groupName ? `Groepsfase - ${groupName} (return)` : "Groepsfase (return)",
-                  status: "upcoming",
-                });
-              }
-            }
-          }
+        for (const matchup of matchups) {
+          if (excludedPairs.has(pairKey(matchup.teamAName, matchup.teamBName))) continue;
+          const homeTeamId = nameToId.get(matchup.teamAName);
+          const awayTeamId = nameToId.get(matchup.teamBName);
+          if (!homeTeamId || !awayTeamId) continue;
+          matchCounter += 1;
+          newMatches.push({
+            id: `match-custom-${Date.now()}-${matchCounter}`,
+            competitionId,
+            homeTeamId,
+            awayTeamId,
+            date: startDate,
+            time: startTime,
+            location: input.location ?? "",
+            group: matchup.group,
+            round: matchup.group
+              ? `Groepsfase - ${matchup.group}${matchup.leg === 2 ? " (return)" : ""}`
+              : `Groepsfase${matchup.leg === 2 ? " (return)" : ""}`,
+            status: "upcoming",
+          });
         }
 
         set({
@@ -628,6 +632,15 @@ export const useAppStore = create<AppState>()(
         });
       },
 
+      setSquad: (teamId, playerNames) => {
+        const { players } = get();
+        const withoutTeam = players.filter((p) => p.teamId !== teamId);
+        const newPlayers: Player[] = playerNames
+          .map((name) => name.trim())
+          .filter(Boolean)
+          .map((name, i) => ({ id: `player-${teamId}-${Date.now()}-${i}`, teamId, name }));
+        set({ players: [...withoutTeam, ...newPlayers] });
+      },
     }),
     {
       name: "hockeypoule-storage-v3",

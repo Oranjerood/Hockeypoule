@@ -6,16 +6,18 @@ import { Lock } from "lucide-react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
 import { Label } from "../ui/Input";
-import type { SpecialPrediction, Team } from "@/types";
+import type { SpecialPrediction, Team, Player } from "@/types";
 import { teamName } from "@/lib/utils";
 
 export default function SpecialPredictionsPanel({
   teams,
+  players,
   prediction,
   locked,
   onSave,
 }: {
   teams: Team[];
+  players?: Player[];
   prediction?: SpecialPrediction;
   locked: boolean;
   onSave: (data: {
@@ -105,29 +107,58 @@ export default function SpecialPredictionsPanel({
 
         <div className="sm:col-span-2">
           <Label>{t("topscorerPrediction")}</Label>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <input
-              disabled={locked}
-              value={topscorer1}
-              onChange={(e) => setTopscorer1(e.target.value)}
-              placeholder="1e keuze"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
-            />
-            <input
-              disabled={locked}
-              value={topscorer2}
-              onChange={(e) => setTopscorer2(e.target.value)}
-              placeholder="2e keuze"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
-            />
-            <input
-              disabled={locked}
-              value={topscorer3}
-              onChange={(e) => setTopscorer3(e.target.value)}
-              placeholder="3e keuze"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
-            />
-          </div>
+          {players && players.length > 0 ? (
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                [topscorer1, setTopscorer1],
+                [topscorer2, setTopscorer2],
+                [topscorer3, setTopscorer3],
+              ].map(([value, setter], i) => (
+                <select
+                  key={i}
+                  disabled={locked}
+                  value={value as string}
+                  onChange={(e) => (setter as (v: string) => void)(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+                >
+                  <option value="">{t("topscorerChoice", { n: i + 1 })}</option>
+                  {players.map((player) => {
+                    const playerTeam = teams.find((team) => team.id === player.teamId);
+                    return (
+                      <option key={player.id} value={player.name}>
+                        {player.name}
+                        {playerTeam ? ` (${teamName(playerTeam, locale)})` : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-3">
+              <input
+                disabled={locked}
+                value={topscorer1}
+                onChange={(e) => setTopscorer1(e.target.value)}
+                placeholder={t("topscorerChoice", { n: 1 })}
+                className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+              />
+              <input
+                disabled={locked}
+                value={topscorer2}
+                onChange={(e) => setTopscorer2(e.target.value)}
+                placeholder={t("topscorerChoice", { n: 2 })}
+                className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+              />
+              <input
+                disabled={locked}
+                value={topscorer3}
+                onChange={(e) => setTopscorer3(e.target.value)}
+                placeholder={t("topscorerChoice", { n: 3 })}
+                className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm disabled:opacity-60"
+              />
+            </div>
+          )}
         </div>
 
       </div>

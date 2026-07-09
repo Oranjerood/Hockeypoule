@@ -232,7 +232,83 @@ export function buildUserStats(
   };
 }
 
-export function isPredictionLocked(match: Match, now: Date = new Date()): boolean {
-  const kickoff = new Date(`${match.date}T${match.time}:00`);
-  return now.getTime() >= kickoff.getTime() || match.status !== "upcoming";
+// Groups matches into "phases" that lock together: the whole group stage is
+// one phase (however many named rounds it has, e.g. "Groepsfase - Ronde 1"),
+// and each knockout round (Kwartfinale, Halve finale, Finale, ...) is its own
+// phase. Matches within the same phase all lock together the moment the
+// FIRST match of that phase kicks off - not just each match individually -
+// so you fill in a whole phase's predictions in one go before it starts,
+// then get a fresh window to predict the next phase once it's seeded.
+export function getMatchPhaseKey(match: Match): string {
+  const round = match.round.toLowerCase();
+  if (round.includes("groep") || round.includes("group") || round.includes("poule")) {
+    return "group";
+  }
+  return match.round;
+}
+
+function kickoffTime(match: Match): number {
+  return new Date(`${match.date}T${match.time}:00`).getTime();
+}
+
+/**
+ * A match's predictions are locked once the EARLIEST match in its phase
+ * (same competition + division + phase) has kicked off, or once the match
+ * itself is no longer upcoming. Pass the full set of matches for the
+ * competition/division so the phase-wide lock can be computed correctly;
+ * without it, this falls back to locking the match at its own kickoff.
+ */
+export function isPredictionLocked(
+  match: Match,
+  allMatches: Match[] = [match],
+  now: Date = new Date()
+): boolean {
+  if (match.status !== "upcoming") return true;
+
+  const phaseKey = getMatchPhaseKey(match);
+  const phaseMatches = allMatches.filter(
+    (m) =>
+      m.competitionId === match.competitionId &&
+      m.division === match.division &&
+      getMatchPhaseKey(m) === phaseKey
+  );
+  const relevant = phaseMatches.length > 0 ? phaseMatches : [match];
+  const earliestKickoff = Math.min(...relevant.map(kickoffTime));
+
+  return now.getTime() >= earliestKickoff;
+}
+
+/**
+ * The phase a user should currently be predicting for a competition/division:
+ * the earliest phase (by its first kickoff) that hasn't started yet. Used to
+ * show a "new phase open - go fill in your predictions" banner once a new
+ * round is seeded.
+ */
+export function getOpenPhase(
+  matches: Match[],
+  now: Date = new Date()
+): { phaseKey: string; round: string; firstKickoff: number } | null {
+  const upcoming = matches.filter((m) => m.status === "upcoming");
+  if (upcoming.length === 0) return null;
+
+  const phases = new Map<string, { round: string; firstKickoff: number }>();
+  for (const match of upcoming) {
+    const phaseKey = getMatchPhaseKey(match);
+    const kickoff = kickoffTime(match);
+    const existing = phases.get(phaseKey);
+    if (!existing || kickoff < existing.firstKickoff) {
+      phases.set(phaseKey, { round: match.round, firstKickoff: kickoff });
+    }
+  }
+
+  // The "open" phase is the one with the earliest first-kickoff that hasn't
+  // started yet - i.e. the next phase you can still fill in.
+  let best: { phaseKey: string; round: string; firstKickoff: number } | null = null;
+  for (const [phaseKey, info] of phases.entries()) {
+    if (info.firstKickoff <= now.getTime()) continue;
+    if (!best || info.firstKickoff < best.firstKickoff) {
+      best = { phaseKey, ...info };
+    }
+  }
+  return best;
 }

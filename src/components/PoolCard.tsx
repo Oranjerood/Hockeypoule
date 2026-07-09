@@ -6,6 +6,7 @@ import { Users, Crown, Trophy } from "lucide-react";
 import Card from "./ui/Card";
 import Badge from "./ui/Badge";
 import type { Pool, Team } from "@/types";
+import { poolDisplayName } from "@/lib/utils";
 
 export default function PoolCard({
   pool,
@@ -34,7 +35,9 @@ export default function PoolCard({
             <Badge tone="primary">#{position}</Badge>
           )}
         </div>
-        <h3 className="mt-3 font-semibold leading-tight">{pool.name}</h3>
+        <h3 className="mt-3 font-semibold leading-tight">
+          {poolDisplayName(pool, { official: c("officialPool"), women: c("women"), men: c("men") })}
+        </h3>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
           {pool.isNational && (
             <span className="text-xs font-medium text-primary">{c("officialPool")}</span>

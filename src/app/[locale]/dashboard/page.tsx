@@ -6,12 +6,13 @@ import PoolCard from "@/components/PoolCard";
 import Button from "@/components/ui/Button";
 import { useAppStore } from "@/lib/store";
 import { getPoolsForUser, getMembersForPool, computePoolLeaderboard, hasCompetitionAccess } from "@/lib/pool-helpers";
-import { PlusCircle, UsersRound, Trophy, ArrowRight, Sparkles } from "lucide-react";
+import { PlusCircle, UsersRound, Trophy, ArrowRight, Sparkles, Megaphone } from "lucide-react";
 import PoolSwitcher from "@/components/PoolSwitcher";
 import Card from "@/components/ui/Card";
 import { Link } from "@/i18n/navigation";
 import { getSport } from "@/data/mock-data";
 import { formatCurrency } from "@/lib/utils";
+import { getOpenPhase } from "@/lib/scoring";
 
 const WK_HOCKEY_ID = "comp-wk-hockey-2026";
 
@@ -45,6 +46,26 @@ function DashboardContent() {
       !competition.comingSoon &&
       !hasCompetitionAccess(competition, competitionAccess, currentUser.id)
   );
+
+  // Once the group stage fully concludes and a new knockout phase is
+  // seeded, surface a banner prompting the user to fill in fresh
+  // predictions for that phase (the practical, in-app stand-in for a real
+  // push/email notification, which this prototype doesn't send yet).
+  const phaseAlerts: { competitionName: string; round: string }[] = [];
+  for (const competition of competitions) {
+    if (!hasCompetitionAccess(competition, competitionAccess, currentUser.id)) continue;
+    const compTeams = teams.filter((tm) => tm.competitionId === competition.id);
+    const divisions = compTeams.some((tm) => tm.division) ? (["women", "men"] as const) : [undefined];
+    for (const division of divisions) {
+      const relevant = matches.filter(
+        (m) => m.competitionId === competition.id && (division === undefined || m.division === division)
+      );
+      const openPhase = getOpenPhase(relevant);
+      if (openPhase && openPhase.phaseKey !== "group") {
+        phaseAlerts.push({ competitionName: competition.name, round: openPhase.round });
+      }
+    }
+  }
 
   // Competitions where the user has both an official women's and men's pool
   // get a "combined standings" card next to those two.
@@ -91,6 +112,23 @@ function DashboardContent() {
           </Button>
         </div>
       </div>
+
+      {phaseAlerts.length > 0 && (
+        <div className="mt-6 flex flex-col items-start gap-3 rounded-2xl bg-primary/10 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            <Megaphone size={18} className="mt-0.5 shrink-0 text-primary" />
+            <div>
+              <p className="font-semibold text-primary">{t("phaseOpenTitle")}</p>
+              <p className="text-sm text-muted">
+                {t("phaseOpenText", { round: phaseAlerts[0].round })}
+              </p>
+            </div>
+          </div>
+          <Button href="/predictions" size="sm" className="shrink-0">
+            {t("phaseOpenButton")}
+          </Button>
+        </div>
+      )}
 
       {startableCompetitions.length > 0 && (
         <div className="mt-8">

@@ -13,7 +13,7 @@ import { isPredictionLocked, scoreMatchPrediction, DEFAULT_POINTS_SETTINGS } fro
 import SharedGroupStandingsTable from "@/components/GroupStandingsTable";
 import type { Team, Match } from "@/types";
 
-function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; allTeams: Team[] }) {
+function TeamMatchRow({ match, team, allTeams, divisionMatches }: { match: Match; team: Team; allTeams: Team[]; divisionMatches: Match[] }) {
   const locale = useLocale();
   const t = useTranslations("Team");
   const tp = useTranslations("PoolDetail");
@@ -31,7 +31,7 @@ function TeamMatchRow({ match, team, allTeams }: { match: Match; team: Team; all
     match.status === "finished" ? t("statusFinished") : match.status === "live" ? t("statusLive") : t("statusUpcoming");
 
   const prediction = predictions.find((p) => p.matchId === match.id && p.userId === currentUser?.id);
-  const locked = isPredictionLocked(match);
+  const locked = isPredictionLocked(match, divisionMatches);
   const points =
     match.status === "finished" ? scoreMatchPrediction(match, prediction, DEFAULT_POINTS_SETTINGS) : null;
 
@@ -144,7 +144,10 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
   const locale = useLocale();
   const t = useTranslations("Team");
   const c = useTranslations("Common");
-  const teamMatches = matches
+  const divisionMatches = matches.filter(
+    (m) => m.competitionId === team.competitionId && m.division === team.division
+  );
+  const teamMatches = divisionMatches
     .filter((m) => m.homeTeamId === team.id || m.awayTeamId === team.id)
     .sort((a, b) => new Date(a.date + "T" + a.time).getTime() - new Date(b.date + "T" + b.time).getTime());
 
@@ -159,13 +162,48 @@ function TeamDivisionSection({ team, allTeams, matches }: { team: Team; allTeams
             <p className="text-sm text-muted">{t("noMatchesYet")}</p>
           ) : (
             teamMatches.map((match) => (
-              <TeamMatchRow key={match.id} match={match} team={team} allTeams={allTeams} />
+              <TeamMatchRow key={match.id} match={match} team={team} allTeams={allTeams} divisionMatches={divisionMatches} />
             ))
           )}
         </div>
         <GroupStandingsTable team={team} allTeams={allTeams} matches={matches} locale={locale} />
       </div>
     </div>
+  );
+}
+
+function SquadCard({ team }: { team: Team }) {
+  const locale = useLocale();
+  const t = useTranslations("Team");
+  const c = useTranslations("Common");
+  const players = useAppStore((s) => s.players);
+  const teamPlayers = players.filter((p) => p.teamId === team.id);
+
+  return (
+    <Card className="mt-4 p-6">
+      <div className="flex items-center gap-2">
+        <Users size={18} className="text-primary" />
+        <h2 className="font-semibold">
+          {t("squad")}
+          {team.division && (
+            <span className="ml-2 text-sm font-normal text-muted">
+              ({team.division === "women" ? c("women") : c("men")})
+            </span>
+          )}
+        </h2>
+      </div>
+      {teamPlayers.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">{t("squadComingSoon")}</p>
+      ) : (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {teamPlayers.map((player) => (
+            <div key={player.id} className="rounded-lg border border-border px-3 py-2 text-sm">
+              {player.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -222,15 +260,13 @@ function TeamPageContent() {
         <TeamDivisionSection team={team} allTeams={teams} matches={matches} />
       )}
 
-      <Card className="mt-8 p-6">
-        <div className="flex items-center gap-2">
-          <Users size={18} className="text-primary" />
-          <h2 className="font-semibold">{t("squad")}</h2>
-        </div>
-        <p className="mt-2 text-sm text-muted">
-          {t("squadComingSoon")}
-        </p>
-      </Card>
+      <div className="mt-8">
+        {orderedTeams.length > 1 ? (
+          orderedTeams.map((t) => <SquadCard key={t.id} team={t} />)
+        ) : (
+          <SquadCard team={team} />
+        )}
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import GroupStandingsTable from "@/components/GroupStandingsTable";
 import { useAppStore } from "@/lib/store";
@@ -83,7 +82,7 @@ export default function WkOverviewPage() {
       </div>
       <p className="mt-4 max-w-2xl text-sm text-muted">{t("subtitle")}</p>
 
-      <Card className="mt-6 flex flex-col items-start gap-4 bg-header p-6 text-white sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-6 flex flex-col items-start gap-4 rounded-2xl bg-header p-6 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-semibold">{t("ctaTitle")}</p>
           <p className="mt-1 text-sm text-white/70">{t("ctaText")}</p>
@@ -91,7 +90,7 @@ export default function WkOverviewPage() {
         <Button href={`/competitions/${WK_ID}`} size="md" className="shrink-0">
           <Trophy size={16} /> {t("ctaButton")} <ArrowRight size={15} />
         </Button>
-      </Card>
+      </div>
 
       <DivisionSection division="women" label={c("women")} />
       <DivisionSection division="men" label={c("men")} />

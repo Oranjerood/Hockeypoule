@@ -12,6 +12,7 @@ import type {
   CompetitionAccess,
   Sponsor,
   Prize,
+  Player,
 } from "@/types";
 
 // -----------------------------------------------------------------------
@@ -350,6 +351,11 @@ export const PRIZES: Prize[] = [
   { id: "prize-2", title: "2 tickets voor de finale", description: "Bekijk de WK-finale live vanaf de tribune.", competitionId: WK_HOCKEY.id },
   { id: "prize-3", title: "Gesigneerd shirt Oranje-Rood Dames 1", description: "Voor de nummer 1 van de landelijke poule.", competitionId: WK_HOCKEY.id },
 ];
+
+// Empty until an admin uploads real squad lists per team. Once any players
+// exist for a competition, topscorer predictions switch from free text to
+// picking from the uploaded squads.
+export const PLAYERS: Player[] = [];
 
 export function getTeam(teamId: string): Team {
   return t(teamId);

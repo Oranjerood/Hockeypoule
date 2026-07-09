@@ -201,6 +201,15 @@ export interface Badge {
   icon: string; // lucide icon name, resolved in the UI
 }
 
+// A roster entry for a team, uploaded by an admin once real squad lists are
+// known. Once any players exist for a competition's teams, topscorer
+// predictions switch from free text to picking from this list.
+export interface Player {
+  id: string;
+  teamId: string;
+  name: string;
+}
+
 export interface ChatMessage {
   id: string;
   poolId: string;

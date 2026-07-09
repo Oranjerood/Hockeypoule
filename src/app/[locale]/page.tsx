@@ -1,6 +1,6 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Trophy, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, PlusCircle, Mail, Heart } from "lucide-react";
+import { Trophy, Zap, Sliders, Globe2, Building2, ArrowRight, KeyRound, Mail, Heart } from "lucide-react";
 import {
   JoinPoolMockup,
   PredictScoreMockup,
@@ -29,8 +29,8 @@ export default function HomePage() {
   const features = [
     { icon: Zap, title: t("featureLive"), text: t("featureLiveText") },
     { icon: Sliders, title: t("featureFlexible"), text: t("featureFlexibleText") },
-    { icon: Globe2, title: t("featureMultiSport"), text: t("featureMultiSportText") },
     { icon: Building2, title: t("featureCompany"), text: t("featureCompanyText") },
+    { icon: Globe2, title: t("featureMultiSport"), text: t("featureMultiSportText") },
   ];
 
   const featured = COMPETITIONS.find((comp) => comp.id === "comp-wk-hockey-2026")!;
@@ -68,14 +68,6 @@ export default function HomePage() {
             </Button>
             <Button href="/pools/join" variant="outline" size="lg" className="border-white/20 text-white">
               <KeyRound size={16} /> {t("ctaJoin")}
-            </Button>
-            <Button
-              href={{ pathname: "/pools/create", query: { competitionId: featured.id } }}
-              variant="ghost"
-              size="lg"
-              className="text-white/80 hover:text-white"
-            >
-              <PlusCircle size={16} /> {t("ctaCreate")}
             </Button>
           </div>
 

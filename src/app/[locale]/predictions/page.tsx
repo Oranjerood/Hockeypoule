@@ -13,6 +13,7 @@ import type { Competition, Division } from "@/types";
 
 function CompetitionPredictions({ competition }: { competition: Competition }) {
   const c = useTranslations("Common");
+  const t = useTranslations("Predictions");
   const teams = useAppStore((s) => s.teams);
   const matches = useAppStore((s) => s.matches);
   const sport = getSport(competition.sportId);
@@ -33,21 +34,26 @@ function CompetitionPredictions({ competition }: { competition: Competition }) {
       </div>
 
       {hasDivisions && (
-        <div className="mt-4 inline-flex gap-1 rounded-full bg-surface p-1">
-          {divisions.map((division) => (
-            <button
-              key={division}
-              onClick={() => setActive(division)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                active === division
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted hover:text-foreground"
-              }`}
-            >
-              {division === "women" ? c("women") : c("men")}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="mt-4 inline-flex gap-1 rounded-full bg-surface p-1">
+            {divisions.map((division) => (
+              <button
+                key={division}
+                onClick={() => setActive(division)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  active === division
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted hover:text-foreground"
+                }`}
+              >
+                {division === "women" ? c("women") : c("men")}
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 text-sm font-medium text-primary">
+            {t("viewingSchedule", { division: active === "women" ? c("women") : c("men") })}
+          </p>
+        </>
       )}
 
       <div className="mt-6">

@@ -15,19 +15,21 @@ export default function MatchCard({
   prediction,
   settings,
   onSave,
+  allMatches,
 }: {
   match: Match;
   teams: Team[];
   prediction?: Prediction;
   settings: PointsSettings;
   onSave: (homeScore: number, awayScore: number) => void;
+  allMatches?: Match[];
 }) {
   const t = useTranslations("PoolDetail");
   const tc = useTranslations("Common");
   const locale = useLocale();
   const home = teams.find((team) => team.id === match.homeTeamId)!;
   const away = teams.find((team) => team.id === match.awayTeamId)!;
-  const locked = isPredictionLocked(match);
+  const locked = isPredictionLocked(match, allMatches);
 
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? 0);
   const [awayScore, setAwayScore] = useState(prediction?.awayScore ?? 0);

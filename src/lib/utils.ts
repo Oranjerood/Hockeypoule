@@ -73,3 +73,17 @@ export function extractInviteCode(input: string): string {
   }
   return trimmed;
 }
+
+// National pool names are stored as fixed Dutch strings in the demo data
+// (e.g. "Officiële Poule — Vrouwen WK"), so they'd show up untranslated on
+// the English site. For national pools, compute a locale-aware label from
+// translated building blocks instead of trusting the stored name; custom/
+// company pools keep whatever name their creator gave them.
+export function poolDisplayName(
+  pool: { name: string; isNational?: boolean; division?: "women" | "men" },
+  labels: { official: string; women: string; men: string }
+): string {
+  if (!pool.isNational) return pool.name;
+  const divisionLabel = pool.division === "women" ? labels.women : pool.division === "men" ? labels.men : "";
+  return divisionLabel ? `${labels.official} — ${divisionLabel}` : labels.official;
+}

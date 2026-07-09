@@ -22,7 +22,7 @@ import {
   computePoolLeaderboard,
   hasCompetitionAccess,
 } from "@/lib/pool-helpers";
-import { teamName } from "@/lib/utils";
+import { teamName, poolDisplayName } from "@/lib/utils";
 
 type Tab = "leaderboard" | "participants" | "matches" | "rules" | "stats" | "chat";
 
@@ -79,7 +79,9 @@ function PoolDetailContent() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Trophy size={24} />
         </div>
-        <h1 className="mt-4 text-xl font-bold">{pool.name}</h1>
+        <h1 className="mt-4 text-xl font-bold">
+          {poolDisplayName(pool, { official: c("officialPool"), women: c("women"), men: c("men") })}
+        </h1>
         {canAccess ? (
           <>
             <p className="mt-2 text-sm text-muted">
@@ -130,7 +132,9 @@ function PoolDetailContent() {
         </div>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{pool.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {poolDisplayName(pool, { official: c("officialPool"), women: c("women"), men: c("men") })}
+            </h1>
             {pool.division && (
               <Badge tone={pool.division === "women" ? "primary" : "neutral"} className="text-sm">
                 {pool.division === "women" ? c("women") : c("men")}
@@ -197,7 +201,7 @@ function PoolDetailContent() {
             settings={settings}
             leaderboard={leaderboard}
             defaultUserId={currentUser.id}
-            poolName={pool.name}
+            poolName={poolDisplayName(pool, { official: c("officialPool"), women: c("women"), men: c("men") })}
           />
         )}
         {tab === "chat" && !pool.isNational && (

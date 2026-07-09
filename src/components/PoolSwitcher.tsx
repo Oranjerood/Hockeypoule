@@ -7,12 +7,14 @@ import { ArrowRightLeft } from "lucide-react";
 import Button from "./ui/Button";
 import { useAppStore } from "@/lib/store";
 import { getPoolsForUser } from "@/lib/pool-helpers";
+import { poolDisplayName } from "@/lib/utils";
 
 // Reusable "quick switch" between the pools a user belongs to, plus a
 // virtual entry for the combined women+men overall standings (when the
 // competition has both an official women's and men's pool).
 export default function PoolSwitcher({ currentPoolId }: { currentPoolId?: string }) {
   const t = useTranslations("Dashboard");
+  const c = useTranslations("Common");
   const router = useRouter();
   const currentUser = useAppStore((s) => s.currentUser());
   const pools = useAppStore((s) => s.pools);
@@ -71,7 +73,7 @@ export default function PoolSwitcher({ currentPoolId }: { currentPoolId?: string
             .filter(({ pool }) => pool.id !== currentPoolId)
             .map(({ pool }) => (
               <option key={pool.id} value={pool.id}>
-                {pool.name}
+                {poolDisplayName(pool, { official: c("officialPool"), women: c("women"), men: c("men") })}
               </option>
             ))}
           {combinedOptions.map((competition) => (
