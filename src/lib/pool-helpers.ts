@@ -35,13 +35,21 @@ export function getMatchesForCompetition(
   allMatches: Match[],
   competitionId: string,
   division?: Division,
-  teamId?: string
+  teamIds?: string[]
 ) {
+  // When teamIds is set (a country-scoped pool), matches for ALL of those
+  // teams are included regardless of division - this lets one pool combine
+  // a country's women's AND men's matches together. Otherwise, fall back to
+  // filtering by division only.
+  if (teamIds && teamIds.length > 0) {
+    return allMatches.filter(
+      (m) =>
+        m.competitionId === competitionId &&
+        (teamIds.includes(m.homeTeamId) || teamIds.includes(m.awayTeamId))
+    );
+  }
   return allMatches.filter(
-    (m) =>
-      m.competitionId === competitionId &&
-      (division === undefined || m.division === division) &&
-      (teamId === undefined || m.homeTeamId === teamId || m.awayTeamId === teamId)
+    (m) => m.competitionId === competitionId && (division === undefined || m.division === division)
   );
 }
 
@@ -76,7 +84,7 @@ export function computePoolLeaderboard(
 ) {
   const memberIds = getMembersForPool(poolMembers, pool.id).map((m) => m.userId);
   const poolUsers = users.filter((u) => memberIds.includes(u.id));
-  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamId);
+  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamIds);
   const matchIds = new Set(matches.map((m) => m.id));
 
   // Predictions and special predictions are shared across every pool for

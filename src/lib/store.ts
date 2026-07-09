@@ -47,7 +47,7 @@ interface CreatePoolInput {
   visibility: "public" | "private";
   division?: "women" | "men";
   logoUrl?: string;
-  countryTeamId?: string;
+  countryTeamIds?: string[];
 }
 
 interface CreateCompanyInput {
@@ -480,7 +480,7 @@ export const useAppStore = create<AppState>()(
           ownerId,
           division: input.division,
           logoUrl: input.logoUrl,
-          countryTeamId: input.countryTeamId,
+          countryTeamIds: input.countryTeamIds,
           createdAt: new Date().toISOString(),
         };
         const newMember: PoolMember = {

@@ -66,8 +66,8 @@ function PoolDetailContent() {
   const members = getMembersForPool(poolMembers, pool.id);
   const isMember = members.some((m) => m.userId === currentUser.id);
   const myMembership = members.find((m) => m.userId === currentUser.id);
-  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamId);
-  const countryTeam = pool.countryTeamId ? teams.find((tm) => tm.id === pool.countryTeamId) : undefined;
+  const matches = getMatchesForCompetition(allMatches, pool.competitionId, pool.division, pool.countryTeamIds);
+  const countryTeam = pool.countryTeamIds?.length ? teams.find((tm) => pool.countryTeamIds!.includes(tm.id)) : undefined;
   const competition = competitions.find((comp) => comp.id === pool.competitionId);
   const settings = getPointsSettings(pool.id);
 

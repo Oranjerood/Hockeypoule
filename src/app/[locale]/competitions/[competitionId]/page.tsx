@@ -413,7 +413,7 @@ function CompetitionHubContent() {
             pool, poolMembers, users, predictions, specialPredictions, settings, matches
           );
           const myRow = leaderboard.find((r) => r.userId === currentUser.id);
-          const countryTeam = pool.countryTeamId ? teams.find((tm) => tm.id === pool.countryTeamId) : undefined;
+          const countryTeam = pool.countryTeamIds?.length ? teams.find((tm) => pool.countryTeamIds!.includes(tm.id)) : undefined;
           return (
             <PoolCard
               key={pool.id}

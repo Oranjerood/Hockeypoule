@@ -39,16 +39,30 @@ function CreatePoolContent() {
   const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [division, setDivision] = useState<"women" | "men" | "">("");
   const [scope, setScope] = useState<"full" | "country">("full");
-  const [countryTeamId, setCountryTeamId] = useState("");
+  const [countryKey, setCountryKey] = useState("");
 
   const hasDivisions = teams.some(
     (team) => team.competitionId === competitionId && team.division
   );
-  const scopeTeams = teams
-    .filter((team) => team.competitionId === competitionId && (!hasDivisions || team.division === division))
-    .slice()
-    .sort((a, b) => teamName(a, locale).localeCompare(teamName(b, locale)));
-  const canPickCountry = !hasDivisions || !!division;
+
+  // Group this competition's teams by country so picking "one country" can
+  // span both divisions at once (e.g. Argentina women's + men's matches
+  // together), instead of being nested under a division choice.
+  const countryGroups = teams
+    .filter((team) => team.competitionId === competitionId)
+    .reduce<{ key: string; team: (typeof teams)[number]; teamIds: string[] }[]>((acc, team) => {
+      const key = team.country || team.name;
+      const existing = acc.find((g) => g.key === key);
+      if (existing) {
+        existing.teamIds.push(team.id);
+      } else {
+        acc.push({ key, team, teamIds: [team.id] });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => teamName(a.team, locale).localeCompare(teamName(b.team, locale)));
+
+  const selectedCountryGroup = countryGroups.find((g) => g.key === countryKey);
 
   function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -63,9 +77,9 @@ function CreatePoolContent() {
       name,
       competitionId,
       visibility,
-      division: division || undefined,
+      division: scope === "full" ? division || undefined : undefined,
       logoUrl: logoPreview,
-      countryTeamId: scope === "country" ? countryTeamId : undefined,
+      countryTeamIds: scope === "country" ? selectedCountryGroup?.teamIds : undefined,
     });
     router.push(`/pools/${pool.id}`);
   }
@@ -141,7 +155,30 @@ function CreatePoolContent() {
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
               </label>
             </div>
-            {hasDivisions && (
+            <div>
+              <Label>{t("predictScope")}</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => setScope("full")}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${
+                    scope === "full" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <span className="font-semibold">{t("scopeFull")}</span>
+                  <p className="mt-1 text-sm text-muted">{t("scopeFullText")}</p>
+                </button>
+                <button
+                  onClick={() => setScope("country")}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${
+                    scope === "country" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <span className="font-semibold">{t("scopeCountry")}</span>
+                  <p className="mt-1 text-sm text-muted">{t("scopeCountryText")}</p>
+                </button>
+              </div>
+            </div>
+            {scope === "full" && hasDivisions && (
               <div>
                 <Label>{t("predictForWhom")}</Label>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -167,49 +204,31 @@ function CreatePoolContent() {
                 </p>
               </div>
             )}
-            {canPickCountry && (
+            {scope === "country" && (
               <div>
-                <Label>{t("predictScope")}</Label>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    onClick={() => setScope("full")}
-                    className={`rounded-2xl border p-4 text-left transition-colors ${
-                      scope === "full" ? "border-primary bg-primary/5" : "border-border"
-                    }`}
-                  >
-                    <span className="font-semibold">{t("scopeFull")}</span>
-                    <p className="mt-1 text-sm text-muted">{t("scopeFullText")}</p>
-                  </button>
-                  <button
-                    onClick={() => setScope("country")}
-                    className={`rounded-2xl border p-4 text-left transition-colors ${
-                      scope === "country" ? "border-primary bg-primary/5" : "border-border"
-                    }`}
-                  >
-                    <span className="font-semibold">{t("scopeCountry")}</span>
-                    <p className="mt-1 text-sm text-muted">{t("scopeCountryText")}</p>
-                  </button>
-                </div>
-                {scope === "country" && (
-                  <select
-                    value={countryTeamId}
-                    onChange={(e) => setCountryTeamId(e.target.value)}
-                    className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
-                  >
-                    <option value="">{t("scopeCountryPlaceholder")}</option>
-                    {scopeTeams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.flagEmoji} {teamName(team, locale)}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <Label>{t("scopeCountry")}</Label>
+                <select
+                  value={countryKey}
+                  onChange={(e) => setCountryKey(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm"
+                >
+                  <option value="">{t("scopeCountryPlaceholder")}</option>
+                  {countryGroups.map((group) => (
+                    <option key={group.key} value={group.key}>
+                      {group.team.flagEmoji} {teamName(group.team, locale)}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
             <Button
               fullWidth
               size="lg"
-              disabled={!name || (hasDivisions && !division) || (scope === "country" && !countryTeamId)}
+              disabled={
+                !name ||
+                (scope === "full" && hasDivisions && !division) ||
+                (scope === "country" && !selectedCountryGroup)
+              }
               onClick={() => setStep(2)}
             >
               {tc("next")}

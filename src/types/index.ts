@@ -114,7 +114,7 @@ export interface Pool {
   isCompany?: boolean;
   companyId?: string;
   division?: Division; // which tournament (e.g. women/men) this pool predicts, when the competition has divisions
-  countryTeamId?: string; // when set, this pool only predicts this one country/team's matches - a lighter alternative to predicting the whole competition
+  countryTeamIds?: string[]; // when set, this pool only predicts this one country's matches (spanning both divisions if the competition has them) - a lighter alternative to predicting the whole competition
   createdAt: string;
 }
 
