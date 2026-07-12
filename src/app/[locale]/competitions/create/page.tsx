@@ -10,6 +10,7 @@ import Input, { Label } from "@/components/ui/Input";
 import { useAppStore } from "@/lib/store";
 import { SPORTS } from "@/data/mock-data";
 import { generateRoundRobinMatchups, defaultGroupAssignment, pairKey } from "@/lib/round-robin";
+import { CUSTOM_COMPETITIONS_ENABLED } from "@/lib/feature-flags";
 import { Plus, Trash2, Upload, Info } from "lucide-react";
 
 interface TeamDraft {
@@ -400,7 +401,24 @@ function CreateCompetitionContent() {
   );
 }
 
+// Custom-competition creation is temporarily switched off site-wide (see
+// CUSTOM_COMPETITIONS_ENABLED) - the wizard itself stays fully intact below
+// so it's a one-line change to bring back.
+function CustomCompetitionsDisabled() {
+  const t = useTranslations("Competitions");
+  return (
+    <div className="mx-auto max-w-xl px-4 py-16 text-center">
+      <h1 className="text-xl font-bold">{t("customUnavailableTitle")}</h1>
+      <p className="mt-2 text-sm text-muted">{t("customUnavailableText")}</p>
+      <Button className="mt-6" href="/dashboard">{t("customUnavailableBack")}</Button>
+    </div>
+  );
+}
+
 export default function CreateCompetitionPage() {
+  if (!CUSTOM_COMPETITIONS_ENABLED) {
+    return <CustomCompetitionsDisabled />;
+  }
   return (
     <RequireAuth>
       <CreateCompetitionContent />

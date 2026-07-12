@@ -12,6 +12,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { COMPETITIONS, TEAMS, getSport } from "@/data/mock-data";
 import { formatCurrency, teamName } from "@/lib/utils";
+import { CUSTOM_COMPETITIONS_ENABLED } from "@/lib/feature-flags";
 
 export default function HomePage() {
   const t = useTranslations("Home");
@@ -30,7 +31,11 @@ export default function HomePage() {
     { icon: Zap, title: t("featureLive"), text: t("featureLiveText") },
     { icon: Sliders, title: t("featureFlexible"), text: t("featureFlexibleText") },
     { icon: Building2, title: t("featureCompany"), text: t("featureCompanyText") },
-    { icon: Globe2, title: t("featureMultiSport"), text: t("featureMultiSportText") },
+    // Custom-competition upload is temporarily disabled site-wide - see
+    // CUSTOM_COMPETITIONS_ENABLED. Re-add this card when it's switched back on.
+    ...(CUSTOM_COMPETITIONS_ENABLED
+      ? [{ icon: Globe2, title: t("featureMultiSport"), text: t("featureMultiSportText") }]
+      : []),
   ];
 
   const featured = COMPETITIONS.find((comp) => comp.id === "comp-wk-hockey-2026")!;
@@ -119,13 +124,15 @@ export default function HomePage() {
             );
           })}
 
-          <Link href="/competitions/create">
-            <Card className="flex h-full flex-col items-start justify-center gap-2 border-dashed p-6 text-left transition-shadow hover:shadow-md">
-              <Globe2 size={28} className="text-primary" />
-              <h3 className="font-semibold">{tc("createCustom")}</h3>
-              <p className="text-sm text-muted">{tc("createCustomText")}</p>
-            </Card>
-          </Link>
+          {CUSTOM_COMPETITIONS_ENABLED && (
+            <Link href="/competitions/create">
+              <Card className="flex h-full flex-col items-start justify-center gap-2 border-dashed p-6 text-left transition-shadow hover:shadow-md">
+                <Globe2 size={28} className="text-primary" />
+                <h3 className="font-semibold">{tc("createCustom")}</h3>
+                <p className="text-sm text-muted">{tc("createCustomText")}</p>
+              </Card>
+            </Link>
+          )}
         </div>
       </section>
 
