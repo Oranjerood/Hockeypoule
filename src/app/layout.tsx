@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function () {
   try {
-    var raw = localStorage.getItem('hockeypoule-storage-v3');
+    var raw = localStorage.getItem('hockeypoule-storage-v4');
     var theme = null;
     if (raw) {
       var parsed = JSON.parse(raw);

@@ -643,8 +643,8 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: "hockeypoule-storage-v3",
-      version: 3,
+      name: "hockeypoule-storage-v4",
+      version: 4,
     }
   )
 );
