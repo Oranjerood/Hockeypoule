@@ -48,10 +48,11 @@ export default function AdminCompetitionsPanel({
       </Button>
       {showNote && (
         <p className="rounded-xl bg-primary/5 p-3 text-xs text-muted">
-          Gebruikers kunnen zelf competities aanmaken via &quot;Maak je eigen competitie&quot; op het
-          dashboard — die verschijnen hier automatisch. Voor nieuwe <em>officiële</em> competities
-          (zoals de Hoofdklasse of een volgend EK) is het datamodel al generiek opgezet
-          (Sports/Competitions/Teams/Matches); dat vraagt hier alleen een formulier, geen nieuwe code.
+          &quot;Zelf een competitie aanmaken&quot; staat momenteel tijdelijk uit op de site (zie
+          CUSTOM_COMPETITIONS_ENABLED) — die kan later weer aan. Voor nieuwe <em>officiële</em>
+          competities (zoals de Hoofdklasse of een volgend EK) is het datamodel al generiek
+          opgezet (Sports/Competitions/Teams/Matches); dat vraagt hier alleen een formulier, geen
+          nieuwe code.
         </p>
       )}
     </div>

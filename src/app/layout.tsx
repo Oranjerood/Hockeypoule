@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "HockeyPoule",
-  description: "Eén platform om elk sporttoernooi te voorspellen — voetbal, hockey, of je eigen competitie.",
+  description: "Eén platform om elk sporttoernooi te voorspellen, te beginnen met het WK Hockey 2026.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-192.png",
